@@ -5,7 +5,7 @@ const NON_NUMERIC = new Set(["J, Q, K, A"]);
 const SUITS = ["d", "h", "s", "c"];
 const VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
-class Card{
+export class Card{
     private readonly suit: string;
     private readonly value: string;
     private readonly numValue: number;
@@ -35,7 +35,7 @@ class Card{
     }
 }
 
-class Deck{
+export class Deck{
     private readonly cardDeck:Array<Card> = [];
     public constructor(numOfDecks:number){
         for(let i = 0; i < numOfDecks; i++){

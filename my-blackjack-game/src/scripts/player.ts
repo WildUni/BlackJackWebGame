@@ -1,4 +1,4 @@
-import { Card } from './deck';
+import { Card } from './deck.ts';
 
 export class Player { 
     private hand: Card[] = [];
