@@ -18,7 +18,7 @@ export class Player {
         }
     }
 
-    getHand(): Card[][] {
+    getHands(): Card[][] {
         return this.hand;
     }
 
