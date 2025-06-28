@@ -3,67 +3,82 @@ import { Player } from "./player";
 import { Card } from "./deck";
 import assert from "assert";
 
-type Hand = {
-    inPlay: boolean, 
-    cards: Array<Card>}
-    ;
+type userInfo = {
+    id:number,
+    name: string;
+    chips: number;
+}
+
+type hand = {
+    cards: Array<Card>,
+    inPlay: boolean
+}
 
 class Game{
-    private readonly playerHands: Map<number, Array<Hand>>;
-    private readonly gameDeck: Deck;
+    private readonly currentPlayers:Array<Player>;
+    private readonly deck: Deck;
     private readonly dealer: Array<Card> = [];
+    private gameTerminated = false;
     
-    public constructor(players: Array<Player>, numDecks:number){
-        this.gameDeck = new Deck(numDecks);
-        this.playerHands = new Map();
-        players.forEach((player)=>{
-            //need to aask for bet too here
-            this.playerHands.set(player.playerID, []);
-        })
+    public constructor(players: Array<userInfo>, numDecks:number){
+        this.deck = new Deck(numDecks);
+        this.currentPlayers = [];
+        for(const {id, name, chips} of players){
+            this.currentPlayers.push(new Player(id, name, chips));
+        }
         this.distributeInitialCards();
-        
-        
+        while (!this.gameTerminated){
+            this.playRound();
+        }
     }
 
     /**
      * 
      */
     private distributeInitialCards():void{
-        for(const [ _ , hands] of this.playerHands){
-            hands.push({inPlay: true,
-                        cards: [this.gameDeck.drawCard()]});
-        }
-        this.dealer.push(this.gameDeck.drawCard());
-        for(const [ playerID, hands] of this.playerHands){
-            for(const hand of hands){
-                hand.cards.push(this.gameDeck.drawCard());
-                if (this.checkDouble(hand)){
-                    this.handleDouble(playerID, hand);
+        for(let i = 0; i < 2; i++){
+            for(const player of this.currentPlayers){
+                for(const hand of player.getHand()){
+                    hand.push(this.deck.drawCard());
                 }
             }
+            this.dealer.push(this.deck.drawCard());
+        }  
+    }
+    
+    private playRound():void{
+        for(const player of this.currentPlayers){
+            const hands = player.getHand();
+            let index = 0;
+            while(index < hands.length){
+                if(player.handInPlay(index)){
+                    const hand = hands[index];
+                    if(hand.length === 2 && hand[0].getValue() === hand[1].getValue()){
+                        if(this.handleDuplicate(player, index)){
+                            index ++;
+                        }
+                    }else{
+                        this.playHand(player, index);
+                        index ++;
+                    }
+                }
+            } 
         }
     }
-
-    private checkDouble(hand:Hand):boolean{
-        return hand.cards[0].getValue() === hand.cards[1].getValue();
+    private handleDuplicate(player: Player, index:number):boolean{
+        const hand = player.getHand();
+        const newHands = [];
+        for(const card of hand[index]){
+            newHands.push([card, this.deck.drawCard()]);
+        }
+        player.insertHands(newHands, index);
+        return true;
     }
-
-    private handleDouble(playerID:number, currHand:Hand){
-        //need to ask player for split
-        const response = true;
-        if(response){
-            const hands = this.playerHands.get(playerID);
-            const index = hands?.indexOf(currHand) ?? assert.fail();;
-            const newHands: Array<Hand> = [];
-            for(const card of currHand.cards){
-                newHands.push({
-                    inPlay: true,
-                    cards:[card, this.gameDeck.drawCard()]
-                });
-            }
-            hands?.splice(index, 1, ...newHands);
+    private playHand(player: Player, index:number):void{
+        const hand = player.getHand()[index];
+        if(hand.length === 2 && hand[0].getValue() === hand[1].getValue()){
+            //need interactivity
         }
     }
-
 
 }

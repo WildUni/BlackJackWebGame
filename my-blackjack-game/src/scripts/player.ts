@@ -56,14 +56,17 @@ export class Player {
         this.hand = [];
     }
 
-    insertHand(hand: Card[], index: number): void {
-        this.hand.splice(index, 0, hand);
+    insertHands(hands: Card[][], index: number): void {
+        this.hand.splice(index, 0, ...hands);
     }
 
     deleteHand(index: number): void {
         this.hand.splice(index, 1);
     }
 
+    handInPlay(index:number):boolean{
+        return this.inPlay[index];
+    }
 
     updateInPlay(index: number, status: boolean): void {
         this.inPlay[index] = status;
