@@ -1,74 +1,36 @@
 import { Card } from './deck.ts';
 
+
+type hand = {
+    cards:Array<Card>,
+    inPlay:boolean,
+    assignedChips:number,
+}
 export class Player { 
-    private hand: Card[][] = [];
-    private inPlay: boolean[] = [false, false, false, false];
+    private hand: Array<hand> = [];
     private chips: number;
-    private currBet:number = 0;
+    public readonly playerId;
+    public readonly playerName;
 
-    constructor(initialChips: number = 1000) {
+    constructor(playerId:number, name: string, initialChips: number = 1000) {
         this.chips = initialChips;
+        this.playerId = playerId;
+        this.playerName = name;
     }
 
-    addCard(card: Card, handIndex: number): void {
-        if (this.hand[handIndex]) {
-            this.hand[handIndex].push(card);
-        } else {
-            this.hand.push([card]);
-        }
-    }
-
-    getHand(): Card[][] {
+    public getHands(): Array<hand>{
         return this.hand;
     }
 
-    getHandValue(handIndex: number): number {
-        let value = 0;
-        let aces = 0;
-
-        for (const Deck of this.hand[handIndex]) {
-            const cardValue = Deck.getNumericValue();
-            if (cardValue === 1) {
-                aces++;
-                value += 11;
-            } else {
-                value += cardValue;
-            }
-        }
-
-        while (value > 21 && aces > 0) {
-            value -= 10;
-            aces--;
-        }
-
-        return value;
-    }
-
-    hasBlackjack(handIndex: number): boolean {
-        return this.hand[handIndex].length === 2 && this.getHandValue(handIndex) === 21;
-    }
-
-    isBusted(handIndex: number): boolean {
-        return this.getHandValue(handIndex) > 21;
-    }
-
-    clearHand(): void {
+    public clearHand(): void {
         this.hand = [];
     }
 
-    insertHands(hands: Card[][], index: number): void {
-        this.hand.splice(index, 0, ...hands);
+    public replaceDuplicate(hands: Array<hand>, index: number): void {
+        this.hand.splice(index, 1, ...hands);
     }
 
-    deleteHand(index: number): void {
-        this.hand.splice(index, 1);
-    }
-
-    handInPlay(index:number):boolean{
-        return this.inPlay[index];
-    }
-
-    updateInPlay(index: number, status: boolean): void {
-        this.inPlay[index] = status;
+    public updateChipCount(change:number){
+        this.chips += change;
     }
 }
