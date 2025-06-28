@@ -1,23 +1,25 @@
 import { Card } from './deck.ts';
 
 export class Player { 
-    private hand: Card[] = [];
     private chips: number;
-    private currBet:number = 0;
+    public readonly playerID:number;
+    public readonly playerName:string;
 
-    constructor(initialChips: number = 1000) {
+    public constructor(playerID:number, playerName: string, initialChips: number = 1000) {
         this.chips = initialChips;
+        this.playerID = playerID;
+        this.playerName = playerName;
     }
 
-    addCard(card: Card): void {
+    public addCard(card: Card): void {
         this.hand.push(card);
     }
 
-    getHand(): Card[] {
+    public getHand(): Card[] {
         return [...this.hand];
     }
 
-    getHandValue(): number {
+    public getHandValue(): number {
         let value = 0;
         let aces = 0;
 
@@ -39,17 +41,27 @@ export class Player {
         return value;
     }
 
-    hasBlackjack(): boolean {
+    public hasBlackjack(): boolean {
         return this.hand.length === 2 && this.getHandValue() === 21;
     }
 
-    isBusted(): boolean {
+    public isBusted(): boolean {
         return this.getHandValue() > 21;
     }
 
-    clearHand(): void {
+    public clearHand(): void {
         this.hand = [];
     }
-
+    
+    public bet(amount:number):number{
+        if(amount > this.chips){
+            this.chips = 0;
+            return this.chips;
+        }
+        else{
+            this.chips -= amount;
+            return amount;
+        }
+    }
 
 }
