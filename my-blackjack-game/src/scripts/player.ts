@@ -1,30 +1,33 @@
 import { Card } from './deck.ts';
 
 export class Player { 
+    private hand: Card[][] = [];
+    private inPlay: boolean[] = [false, false, false, false];
     private chips: number;
-    public readonly playerID:number;
-    public readonly playerName:string;
+    private currBet:number = 0;
 
-    public constructor(playerID:number, playerName: string, initialChips: number = 1000) {
+    constructor(initialChips: number = 1000) {
         this.chips = initialChips;
-        this.playerID = playerID;
-        this.playerName = playerName;
     }
 
-    public addCard(card: Card): void {
-        this.hand.push(card);
+    addCard(card: Card, handIndex: number): void {
+        if (this.hand[handIndex]) {
+            this.hand[handIndex].push(card);
+        } else {
+            this.hand.push([card]);
+        }
     }
 
-    public getHand(): Card[] {
-        return [...this.hand];
+    getHand(): Card[][] {
+        return this.hand;
     }
 
-    public getHandValue(): number {
+    getHandValue(handIndex: number): number {
         let value = 0;
         let aces = 0;
 
-        for (const card of this.hand) {
-            const cardValue = card.getNumericValue(); 
+        for (const Deck of this.hand[handIndex]) {
+            const cardValue = Deck.getNumericValue();
             if (cardValue === 1) {
                 aces++;
                 value += 11;
@@ -41,27 +44,28 @@ export class Player {
         return value;
     }
 
-    public hasBlackjack(): boolean {
-        return this.hand.length === 2 && this.getHandValue() === 21;
+    hasBlackjack(handIndex: number): boolean {
+        return this.hand[handIndex].length === 2 && this.getHandValue(handIndex) === 21;
     }
 
-    public isBusted(): boolean {
-        return this.getHandValue() > 21;
+    isBusted(handIndex: number): boolean {
+        return this.getHandValue(handIndex) > 21;
     }
 
-    public clearHand(): void {
+    clearHand(): void {
         this.hand = [];
     }
-    
-    public bet(amount:number):number{
-        if(amount > this.chips){
-            this.chips = 0;
-            return this.chips;
-        }
-        else{
-            this.chips -= amount;
-            return amount;
-        }
+
+    insertHand(hand: Card[], index: number): void {
+        this.hand.splice(index, 0, hand);
     }
 
+    deleteHand(index: number): void {
+        this.hand.splice(index, 1);
+    }
+
+
+    updateInPlay(index: number, status: boolean): void {
+        this.inPlay[index] = status;
+    }
 }
