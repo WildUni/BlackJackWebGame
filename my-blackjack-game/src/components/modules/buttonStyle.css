@@ -1,0 +1,52 @@
+.game-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 70px;
+}
+
+.hit-btn {
+  background: linear-gradient(45deg, #dc3545, #e74c3c);
+  color: white;
+}
+
+.hit-btn:hover {
+  background: linear-gradient(45deg, #c82333, #dc3545);
+  transform: translateY(-2px);
+}
+
+.stand-btn {
+  background: linear-gradient(45deg, #28a745, #2ecc71);
+  color: white;
+}
+
+.stand-btn:hover {
+  background: linear-gradient(45deg, #218838, #28a745);
+  transform: translateY(-2px);
+}
+
+.double-btn {
+  background: linear-gradient(45deg, #ffc107, #f39c12);
+  color: black;
+}
+
+.double-btn:hover {
+  background: linear-gradient(45deg, #e0a800, #ffc107);
+  transform: translateY(-2px);
+}
+
+.split-btn {
+  background: linear-gradient(45deg, #6f42c1, #8e44ad);
+  color: white;
+}
+
+.split-btn:hover {
+  background: linear-gradient(45deg, #5a32a3, #6f42c1);
+  transform: translateY(-2px);
+}

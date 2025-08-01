@@ -20,7 +20,7 @@ const Table = () => {
         {/* Players Section */}
         <div className='players-section'>
           {/* Player 1 */}
-          <div className='player-seat'>
+          <div className='player-seat other-player current-player'>
             <div className='player-cards'>
               <div className='card-placeholder'>🂠</div>
               <div className='card-placeholder'>🂠</div>

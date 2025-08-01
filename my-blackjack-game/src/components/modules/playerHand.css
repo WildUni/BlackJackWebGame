@@ -1,0 +1,129 @@
+.players-section {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.player-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 120px;
+  padding: 15px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+.player-seat.other-player {
+  width: 80px;
+}
+.player-seat.current-player {
+  background: rgba(255, 215, 0, 0.2);
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.player-seat.empty-seat {
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+}
+
+.player-seat.empty-seat:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-seat-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+}
+
+.join-btn {
+  background: linear-gradient(45deg, #28a745, #2ecc71);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.join-btn:hover {
+  background: linear-gradient(45deg, #218838, #28a745);
+  transform: translateY(-2px);
+}
+
+.player-seat.other-player .player-cards{
+  display: flex;
+  gap: 6px;
+  margin-bottom: 7px;
+}
+
+.player-seat.other-player .card-placeholder{
+  width: 30px;
+  height: 40px;
+  background: linear-gradient(45deg, #1a237e 0%, #3949ab 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.player-cards {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.card-placeholder {
+  width: 45px;
+  height: 60px;
+  background: linear-gradient(45deg, #1a237e 0%, #3949ab 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.player-info {
+  text-align: center;
+  color: white;
+}
+
+.player-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.player-score {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.player-bet {
+  background: rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
