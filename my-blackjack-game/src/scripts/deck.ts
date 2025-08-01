@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 
-const NON_NUMERIC = new Set(["J, Q, K, A"]);
+const NON_NUMERIC = new Set(["J", "Q", "K", "A"]);
 const SUITS = ["d", "h", "s", "c"];
 const VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 

@@ -9,10 +9,14 @@ import Table from './table'
 
 // For now, let's create simple placeholder components
 
+// Remove the misplaced interface and fix the props
+interface GameProps {
+  gameCode: string
+  isHost: boolean
+}
 
-
-// Create and export the main Game component
-const Game = () => {
+// Accept props in the Game component
+const Game: React.FC<GameProps> = ({ gameCode, isHost }) => {
   return (
     <div>
       <Header />
