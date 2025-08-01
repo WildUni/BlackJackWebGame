@@ -1,6 +1,8 @@
 import React from "react";
 
 const BettingArea = (props:{playerID: string, handID: number, owns: boolean, gameState: string}) => {
+
+    //need to add effect for clicking 
     return(
         <div className='betting-area'>
           <div className='bet-info'>
