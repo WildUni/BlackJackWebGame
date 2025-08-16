@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Game from './game'
-import './style.css'
+import '../modules/style.css'
 
 const Index = () => {
   const [gameCode, setGameCode] = useState('')

@@ -21,3 +21,5 @@ const PlayerControls = (props:{playerID: string, handID: number, owns: boolean, 
             return <p>The Host is revealing their cards!</p>
         }
 }
+
+export default PlayerControls;

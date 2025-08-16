@@ -1,6 +1,6 @@
 import React from "react";
-import "./players.css";
-const hand = (props: {playerName: string, selected: boolean, owns:boolean, handValue:number, betValue:number}) =>{
+import "./playerHand.css";
+const Hand = (props: {playerName: string, selected: boolean, owns:boolean, handValue:number, betValue:number}) =>{
     const {playerName, selected, owns, handValue, betValue} = props;
     let typeOfSeat:string = "player-seat";
     if(! owns){
@@ -26,4 +26,4 @@ const hand = (props: {playerName: string, selected: boolean, owns:boolean, handV
 
 }
 
-export default hand;
+export default Hand;

@@ -1,9 +1,7 @@
 import React from 'react'
 import './style.css'
 
-const Header = () => {
-  const GameCode = "1234"; // generate it dynamically
-  
+const Header = (props:{roomID:string}) => {
   return (
     <header className='header'>
       <div className='header-container'>
@@ -19,7 +17,7 @@ const Header = () => {
         {/* Center - Game Title */}
         <div className='header-title'>
           <h1 className='game-title'>Blackjack</h1>
-          <p className='game-subtitle'>Room: {GameCode}</p>
+          <p className='game-subtitle'>Room: {props.roomID}</p>
         </div>
 
         {/* Right - Leave Room Button */}

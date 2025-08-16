@@ -1,7 +1,27 @@
 import React from 'react'
 import './style.css'
+import DealerSection from './DealerSection';
+import PlayerSection from './PlayerSection';
+import PlayerControls from './playerControls';
 
-const Table = () => {
+const Table = (props:{hands:Array<{playerName:string, handValue:number, betValue:number, selected:boolean, owns:boolean,}>}) => {
+  const {hands} = props;
+  return (
+    <div className='table'>
+      <div className='table-container'>
+        {/* Dealer Section */}
+        {/*<DealerSection hands = {hands}></DealerSection>*/}
+
+        {/* Players Section */}
+        <PlayerSection playerID = {"dummy"} hands ={hands}></PlayerSection>
+
+        {/* Game Controls - Only show for current player */}
+        <PlayerControls playerID='DUMMY' handID={100} owns={true} gameState='BETTING'></PlayerControls>
+      </div>
+    </div>
+  )
+
+
   return (
     <div className='table'>
       <div className='table-container'>
