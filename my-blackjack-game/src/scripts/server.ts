@@ -4,10 +4,7 @@ import { Server } from "socket.io";
 import type { Socket } from "socket.io";
 import type { playerInfo } from "./utils";
 import assert from "assert";
-import { join } from "path";
 import GameRoom from "./gameLogic";
-import Game from "../components/pages/game";
-
 
 
 const playerToSocket = new Map<string, Socket>();
@@ -152,6 +149,9 @@ io.on('connection', (socket) => {
                     return;
                 }
                 break;
+        }
+        if(game.getGameState() === "REVEAL"){
+            game.dealerReveal();
         }
         io.to(roomId).emit("gameUpdate", {
             game,

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "tsx src/scripts/server.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
@@ -16,6 +17,7 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.4",
     "typescript": "~5.8.3",
     "vite": "^7.0.0"
   },

@@ -6,6 +6,6 @@ import Index from './index.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Game />
+    <Index />
   </React.StrictMode>,
 )

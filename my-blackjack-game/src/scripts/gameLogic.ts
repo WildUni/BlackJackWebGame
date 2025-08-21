@@ -276,7 +276,6 @@ class GameRoom{
         while (this.getHandValue(this.dealer) < 17){
             this.giveDealerCard();
         }
-        return this.dealer;
     }
 
     /**
