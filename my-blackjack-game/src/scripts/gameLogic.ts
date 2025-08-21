@@ -1,6 +1,8 @@
 import { isUint8ClampedArray } from "util/types";
 import {Card, Deck } from "./deck";
 import assert from "assert";
+import { error } from "console";
+import type { NumericType } from "mongodb";
 
 //CONSTANTS
 const MAX_PLAYERS = 3;
@@ -190,15 +192,15 @@ class GameRoom{
     /*
     Handles double down for the current hand. Function should not be called after distribution phase
      */
-    public handleDoubleDown(playerID:string):boolean{
-        const player = this.players.get(playerID)??assert.fail("Player does not exist");
+    public doubleDownAction():void{
         const hand = this.hands[this.selectionCounter];
-        if(playerID === hand.playerName && player.balance >= hand.betValue){
+        const player = this.players.get(hand.playerName)??assert.fail("Player does not exist");
+        if(player.balance >= hand.betValue){
             hand.betValue += hand.betValue;
             player.balance -= hand.betValue;
-            return true;
+        }else{
+            throw new Error("Insuifficient Balance")
         }
-        return false;
     }
 
     /**
@@ -329,7 +331,13 @@ class GameRoom{
     }
 
 
+    public getNumPlayers():number{
+        return this.players.size;
+    }
 
+    public getCurrentPlayerName():string{
+        return this.hands[this.selectionCounter].playerName;
+    }
 
 }
 

@@ -1,6 +1,16 @@
 import http from "http";
 import express from "express";
-import { Server } from "Socket.io";
+import { Server } from "socket.io";
+import type { Socket } from "socket.io";
+import type { playerInfo } from "./utils";
+import assert from "assert";
+import { join } from "path";
+import GameRoom from "./gameLogic";
+import Game from "../components/pages/game";
+
+
+
+const playerToSocket = new Map<string, Socket>();
 
 const app = express();
 const server = http.createServer(app);
@@ -11,77 +21,154 @@ const io = new Server(server, {
   }
 });
 
-const gameRooms = new Map();
+
+//GU - gameUpdate
+//So far we are emitting the entire gameRoom object, could be optimized 
+
+
+
+const runningGames = new Map<string, GameRoom>();
+const MAX_NUM_PLAYERS = 3;
+//Some room management functions
+async function leaveAllPublic(socket: import("socket.io").Socket) {
+  for (const r of socket.rooms) {
+    if (r !== socket.id) {
+      await socket.leave(r);
+    }
+  }
+}
 
 console.log('🚀 Starting Blackjack server...');
 
 
 io.on('connection', (socket) => {
-  console.log('✅ Player connected:', socket.id);
-
-  socket.on('join-room', (data) => {
-    const { roomId, playerName } = data;
-    console.log(`🎮 "${playerName}" joining room "${roomId}"`);
-    
-    // Join the socket room
-    socket.join(roomId);
-    
-    // Store player info (simplified for testing)
-    if (!gameRooms.has(roomId)) {
-      gameRooms.set(roomId, { players: [] });
+    const { playerName, balance } = socket.handshake.auth;
+    const playerInfo: playerInfo = {
+        playerName,
+        balance,
+        socket: socket.id,
+        ready:false
     }
-    
-    const room = gameRooms.get(roomId);
-    room.players.push({ id: socket.id, name: playerName });
-    
-    // Confirm join
-    socket.emit('join-success', { 
-      roomId, 
-      playerId: socket.id 
-    });
-    
-    // Broadcast to room
-    io.to(roomId).emit('player-joined', {
-      playerId: socket.id,
-      playerName,
-      totalPlayers: room.players.length,
-      message: `${playerName} joined the game!`
-    });
-  });
 
-  socket.on('start-game', (roomId) => {
-    console.log(`🎯 Starting game in room "${roomId}"`);
-    io.to(roomId).emit('game-started', { 
-      message: 'Game started!',
-      gameState: 'playing',
-      roomId 
-    });
-  });
+    console.log(`✅ Player ${playerName} connected:`, socket.id);
 
-  socket.on('player-action', (data) => {
-    const { roomId, action } = data;
-    console.log(`🎲 Player ${socket.id} used "${action}" in room "${roomId}"`);
     
-    io.to(roomId).emit('action-result', {
-      playerId: socket.id,
-      action,
-      message: `Player used ${action}!`,
-      timestamp: new Date().toLocaleTimeString()
-    });
-  });
+    if(playerToSocket.has(playerName)){
+        const oldSocket = playerToSocket.get(playerName)??assert.fail();
+        leaveAllPublic(oldSocket);
+        playerToSocket.set(playerName, socket);
+        console.log("Removed old player socket from server");
+    }
 
-  socket.on('disconnect', () => {
-    console.log('❌ Player disconnected:', socket.id);
-    
-    // Remove player from all rooms
-    gameRooms.forEach((room, roomId) => {
-      room.players = room.players.filter(p => p.id !== socket.id);
-      if (room.players.length === 0) {
-        gameRooms.delete(roomId);
-        console.log(`🗑️ Deleted empty room: ${roomId}`);
-      }
+
+    /**
+     * Handles join room:
+     * If room does not exist, we create a room
+     * If room full, an error message is emitted
+     * If room is not in waiting state, reject join request
+     * If player with same ID tries to rejoin a second time, replace current
+     */
+    socket.on('join-room', (roomID: string) => {
+        let game = runningGames.get(roomID);
+
+        if(!game){
+            game = new GameRoom(roomID);
+            runningGames.set(roomID, game);
+        }
+
+        //if player already exists, replace socket
+        if(game.players.has(playerName)){
+            const tempInfo: playerInfo = game.players.get(playerName)??assert.fail();
+            tempInfo.socket = socket.id;
+            console.log(`🎮 "${playerName}" rejoining room "${roomID}"`);
+            socket.join(roomID);
+            return;       
+        }
+
+
+        //handles max capacity and invalid game state, should split into two checks!
+        if(game.getGameState() != "WAITING" || game.getNumPlayers() >= MAX_NUM_PLAYERS){
+            socket.emit("error-message", { code: "ROOM_FULL", message: `The can be a max of ${MAX_NUM_PLAYERS} players in the room at the same time`});
+            console.log(`🎮 "${playerName}" was declined from room "${roomID}"`);
+            return;
+        }
+        // Join the socket room
+        socket.join(roomID);
+        game.addPlayer(playerInfo);
+        console.log(`🎮 "${playerName}" joining room "${roomID}"`);
+
+        
+        //sends update
+        io.to(roomID).emit("gameUpdate", {
+            game,
+        })
+    })
+
+
+
+    socket.on('player-ready', (roomId) => {
+        const game = runningGames.get(roomId)??assert.fail("Games does not exist");
+        game.changeReadyState(playerName);
+        console.log(`🎯 Player ${playerName} is ${game.players.get(playerName)?.ready ? "ready": "un-ready"} in room "${roomId}"`);
+        if(game.checkAllReady()){
+            console.log(`All Players are ready in room ${roomId}`);
+            game.initBettingHands();
+        }
+        io.to(roomId).emit("gameUpdate", {
+            game,
+        })
     });
-  });
+
+    socket.on('player-bet', (roomId:string, betSize:number)=>{
+        const game = runningGames.get(roomId)??assert.fail("Game does not exist ");
+        assert(game.getGameState() === "BETTING", "Game not in betting state!");
+        game.addBet(playerName, betSize);
+        io.to(roomId).emit("gameUpdate", {
+            game,
+        })
+    })
+
+
+    socket.on('player-action', (roomId: string, action:string) => {
+        const game = runningGames.get(roomId)??assert.fail("Game not found!");
+        switch(action){
+            case "HIT":
+                game.hitAction()
+                break;
+            case "STAND":
+                game.standAction();
+                break;
+            case "DOUBLE":
+                try{
+                    game.doubleDownAction();
+                }catch(e){
+                    const player = game.getCurrentPlayerName()??assert.fail();
+                    const playerSocket = playerToSocket.get(player)??assert.fail();
+                    playerSocket.emit("error", {
+                        code:"INVALID_ACTION",
+                        reason:"Insuifficient Balance!"
+                    })
+                    console.log("Insuifficient Balance! when trying to make a bet")
+                    return;
+                }
+                break;
+        }
+        io.to(roomId).emit("gameUpdate", {
+            game,
+        })  
+    });
+
+    socket.on('leave-room', (roomId:string) => {
+        console.log(`❌ Player  ${playerName} left room ${roomId}`);
+        const game = runningGames.get(roomId)??assert.fail();
+        game.removePlayer(playerName);
+        socket.leave(roomId);
+        io.to(roomId).emit("gameUpdate", {
+                game,
+        });
+    });
+
+
 });
 
 server.listen(3001, () => {

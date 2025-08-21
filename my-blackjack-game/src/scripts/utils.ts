@@ -1,4 +1,6 @@
-import { Card } from "./deck"
+import type { Socket } from "socket.io";
+import { Card } from "./deck";
+
 export type hand = {
     playerName:string,
     cards:Array<Card>,
