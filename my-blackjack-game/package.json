@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.21",
@@ -18,9 +20,10 @@
     "vite": "^7.0.0"
   },
   "dependencies": {
-    "@types/node": "^24.0.4",
+    "express": "^5.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   }
 }
