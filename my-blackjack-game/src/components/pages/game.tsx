@@ -1,57 +1,359 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import '../modules/style.css'
 import Header from '../modules/header'
 import Table from '../modules/table'
 
+// Game state interface matching your GameRoom logic
+interface GameState {
+  roomID: string
+  playerName: string
+  gamePhase: "WAITING" | "BETTING" | "DEALING" | "DISTRIBUTING" | "REVEAL" | "WIN"
+  hands: Array<{
+    playerName: string
+    handValue: number
+    betValue: number
+    selected: boolean
+    owns: boolean
+    inPlay: boolean
+  }>
+  players: Array<{
+    playerName: string
+    balance: number
+    ready: boolean
+  }>
+  currentPlayerTurn: number // selection counter
+  dealerHand: {
+    handValue: number
+    cards: number
+  }
+}
 
-// import Table from './components/Table' 
-// import Hand from './components/Hand'
+const Game = (props: { playerID: string, roomID: string }) => {
+  const [gameState, setGameState] = useState<GameState>({
+    roomID: props.roomID,
+    playerName: props.playerID, // Use playerID as playerName for consistency
+    gamePhase: "WAITING",
+    hands: [],
+    players: [],
+    currentPlayerTurn: 0,
+    dealerHand: {
+      handValue: 0,
+      cards: 0
+    }
+  })
 
-// For now, let's create simple placeholder components
+  // Initialize game - this would typically come from socket connection
+  useEffect(() => {
+    // Initialize with current player
+    setGameState(prev => ({
+      ...prev,
+      players: [{
+        playerName: props.playerID, // Use playerID as playerName
+        balance: 1000,
+        ready: false
+      }],
+      hands: [{
+        playerName: props.playerID, // Use playerID as playerName
+        handValue: 0,
+        betValue: 0,
+        selected: true,
+        owns: true,
+        inPlay: true
+      }]
+    }))
+  }, [props.playerID, props.roomID])
 
-// Remove the misplaced interface and fix the props
+  // Check if all players are ready and auto-transition to betting
+  useEffect(() => {
+    if (gameState.gamePhase === "WAITING" && gameState.players.length > 0) {
+      const allReady = gameState.players.every(player => player.ready)
+      if (allReady) {
+        // All players ready - start betting phase
+        setTimeout(() => {
+          setGameState(prev => ({
+            ...prev,
+            gamePhase: "BETTING"
+          }))
+        }, 1000) // Small delay for UX
+      }
+    }
+  }, [gameState.players, gameState.gamePhase])
 
-// Accept props in the Game component
-const Game = (props:{playerID: string, roomID:string}) => {
-  //Player will need to click on ready in the game room:
-
-  //Different game states:
-  /*
-    WAIT: Waiting for players ready up: Only displays player name, icon, your own balance
-    BET: Players make their bets to the server: Same as waits, also displays betting area
-    DIST: Dealer Distributes cards. Goes around once asking for action, allow double down. Shows Dealer Area, and Player Area, dismount betting area and player icon
-    ACT: Only display the control area if selected card is yours: check using playerName associated with hand
-    REVEAL: Dealer reveals. No play actions avaiblable
-    WIN: Decide the winners. Add the coins, and return to WAIT state.
-  */
-
-
-
-  //procedure:
-  //given code and player id: 
-  //load waiting message until game starts
-  //does update room with current players
-
-  //
-  
-  //this is where the player sockets will be set up
-  const dummyGame = {
-    roomID: "777",
-    playerID: "dummy",
-    hands:[{playerName:"dummy", handValue:10, betValue:10, selected:true, owns:true}, 
-          {playerName:"other", handValue:9, betValue:9, selected:false, owns:false},
-          {playerName:"other2", handValue:100, betValue:100, selected:false, owns:false},
-        {playerName:"other3", handValue:9, betValue:9, selected:false, owns:false}]
+  // Player ready toggle
+  const handlePlayerReady = () => {
+    const currentPlayer = gameState.players.find(p => p.playerName === props.playerID)
+    if (currentPlayer) {
+      handleReadyStateChange(props.playerID, !currentPlayer.ready)
+    }
   }
 
+  // Socket event handlers (these would replace the manual functions)
   
+  // Player joins the room
+  const handlePlayerJoin = (playerName: string, balance: number) => {
+    setGameState(prev => ({
+      ...prev,
+      players: [...prev.players, { playerName, balance, ready: false }],
+      hands: [...prev.hands, {
+        playerName,
+        handValue: 0,
+        betValue: 0,
+        selected: false,
+        owns: false,
+        inPlay: true
+      }]
+    }))
+  }
 
+  // Player ready state change
+  const handleReadyStateChange = (playerName: string, ready: boolean) => {
+    setGameState(prev => ({
+      ...prev,
+      players: prev.players.map(player =>
+        player.playerName === playerName ? { ...player, ready } : player
+      )
+    }))
+  }
+
+  // Start betting phase
+  const handleBettingPhase = () => {
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: "BETTING"
+    }))
+  }
+
+  // Update player bet
+  const handleBetUpdate = (playerName: string, betAmount: number, newBalance: number) => {
+    setGameState(prev => ({
+      ...prev,
+      hands: prev.hands.map(hand =>
+        hand.playerName === playerName ? { ...hand, betValue: betAmount } : hand
+      ),
+      players: prev.players.map(player =>
+        player.playerName === playerName ? { ...player, balance: newBalance } : player
+      )
+    }))
+  }
+
+  // Start dealing phase
+  const handleDealingPhase = (updatedHands: typeof gameState.hands, dealerCards: number) => {
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: "DISTRIBUTING",
+      hands: updatedHands,
+      dealerHand: { ...prev.dealerHand, cards: dealerCards }
+    }))
+  }
+
+  // Update current turn
+  const handleTurnChange = (selectionCounter: number) => {
+    setGameState(prev => ({
+      ...prev,
+      currentPlayerTurn: selectionCounter,
+      hands: prev.hands.map((hand, index) => ({
+        ...hand,
+        selected: index === selectionCounter
+      }))
+    }))
+  }
+
+  // Handle hit action result
+  const handleHitResult = (handIndex: number, newHandValue: number, newCards: any[], inPlay: boolean) => {
+    setGameState(prev => ({
+      ...prev,
+      hands: prev.hands.map((hand, index) =>
+        index === handIndex 
+          ? { ...hand, handValue: newHandValue, inPlay }
+          : hand
+      )
+    }))
+  }
+
+  // Handle stand action
+  const handleStandResult = (handIndex: number) => {
+    setGameState(prev => ({
+      ...prev,
+      hands: prev.hands.map((hand, index) =>
+        index === handIndex 
+          ? { ...hand, inPlay: false }
+          : hand
+      )
+    }))
+  }
+
+  // Handle dealer reveal
+  const handleDealerReveal = (dealerHandValue: number, dealerCards: number) => {
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: "REVEAL",
+      dealerHand: { handValue: dealerHandValue, cards: dealerCards }
+    }))
+  }
+
+  // Handle game restart
+  const handleGameRestart = () => {
+    setGameState(prev => ({
+      ...prev,
+      gamePhase: "WAITING",
+      hands: prev.hands.map(hand => ({
+        ...hand,
+        handValue: 0,
+        betValue: 0,
+        inPlay: true,
+        selected: false
+      })),
+      currentPlayerTurn: 0,
+      dealerHand: { handValue: 0, cards: 0 },
+      players: prev.players.map(player => ({ ...player, ready: false }))
+    }))
+  }
+
+  // Convert game phase to table state
+  const getTableGameState = (): "WAITING" | "BETTING" | "CIRCULATING" | "REVEAL" => {
+    switch (gameState.gamePhase) {
+      case "WAITING":
+        return "WAITING"
+      case "BETTING":
+        return "BETTING"
+      case "DEALING":
+      case "DISTRIBUTING":
+        return "CIRCULATING"
+      case "REVEAL":
+      case "WIN":
+        return "REVEAL"
+      default:
+        return "WAITING"
+    }
+  }
+
+  // Get current player's hand
+  const getCurrentPlayerHand = () => {
+    return gameState.hands.find(hand => hand.owns === true)
+  }
+
+  // Get current player's ready status
+  const getCurrentPlayerReady = () => {
+    return gameState.players.find(p => p.playerName === props.playerID)?.ready || false
+  }
+
+  // Check if all players are ready
+  const allPlayersReady = () => {
+    return gameState.players.length > 0 && gameState.players.every(player => player.ready)
+  }
+
+  const currentHand = getCurrentPlayerHand()
 
   return (
     <div>
-      <Header roomID={dummyGame.roomID}/>
-      <Table hands={dummyGame.hands}/>
+      <Header roomID={gameState.roomID} />
+      <Table 
+        hands={gameState.hands}
+        gameState={getTableGameState()}
+        playerName={gameState.playerName}
+        owns={currentHand?.owns || false}
+        // Pass ready system props
+        onPlayerReady={handlePlayerReady}
+        isPlayerReady={getCurrentPlayerReady()}
+        allReady={allPlayersReady()}
+        players={gameState.players}
+      />
+      
+      {/* Game Info Panel */}
+      <div className='fixed top-24 right-4 bg-slate-800/90 text-white p-4 rounded-lg text-sm max-w-xs backdrop-blur-sm border border-slate-600/50'>
+        <div className='font-bold mb-2 text-yellow-400'>Game Status</div>
+        <div className='space-y-1'>
+          <div>Phase: <span className='text-green-400'>{gameState.gamePhase}</span></div>
+          <div>Players: <span className='text-blue-400'>{gameState.players.length}</span></div>
+          <div>Your Balance: <span className='text-yellow-400'>${getCurrentPlayerHand()?.betValue || 0}</span></div>
+          {gameState.gamePhase === "DISTRIBUTING" && (
+            <div>Turn: <span className='text-purple-400'>{gameState.hands[gameState.currentPlayerTurn]?.playerName}</span></div>
+          )}
+          {gameState.gamePhase === "WAITING" && (
+            <div>
+              Ready: <span className={allPlayersReady() ? 'text-green-400' : 'text-red-400'}>
+                {gameState.players.filter(p => p.ready).length}/{gameState.players.length}
+              </span>
+            </div>
+          )}
+        </div>
+        
+        {/* Player List */}
+        <div className='mt-3 border-t border-slate-600 pt-2'>
+          <div className='font-medium mb-1 text-slate-300'>Players:</div>
+          {gameState.players.map(player => (
+            <div key={player.playerName} className='flex justify-between text-xs'>
+              <span className={player.ready ? 'text-green-400' : 'text-slate-400'}>
+                {player.playerName} {player.ready && '✓'}
+              </span>
+              <span className='text-yellow-400'>${player.balance}</span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Ready status indicator */}
+        {gameState.gamePhase === "WAITING" && (
+          <div className='mt-3 border-t border-slate-600 pt-2'>
+            {allPlayersReady() ? (
+              <div className='text-green-400 text-center text-xs font-bold animate-pulse'>
+                Starting Game...
+              </div>
+            ) : (
+              <div className='text-slate-400 text-center text-xs'>
+                Waiting for all players to ready up
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Debug Panel - Always visible for testing */}
+      <div className='fixed bottom-4 left-4 bg-slate-800/90 text-white p-4 rounded-lg text-xs max-w-sm backdrop-blur-sm border border-slate-600/50 z-50'>
+        <div className='font-bold mb-2 text-red-400'>Debug Controls</div>
+        <div className='grid grid-cols-2 gap-2'>
+          <button 
+            onClick={() => setGameState(prev => ({ ...prev, gamePhase: "WAITING" }))}
+            className='px-2 py-1 bg-slate-600 hover:bg-slate-700 rounded text-xs'
+          >
+            Waiting
+          </button>
+          <button 
+            onClick={() => setGameState(prev => ({ ...prev, gamePhase: "BETTING" }))}
+            className='px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs'
+          >
+            Betting
+          </button>
+          <button 
+            onClick={() => setGameState(prev => ({ ...prev, gamePhase: "DISTRIBUTING" }))}
+            className='px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs'
+          >
+            Playing
+          </button>
+          <button 
+            onClick={() => setGameState(prev => ({ ...prev, gamePhase: "REVEAL" }))}
+            className='px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs'
+          >
+            Reveal
+          </button>
+          <button 
+            onClick={() => handlePlayerJoin(`Player${gameState.players.length + 1}`, 1000)}
+            className='px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs col-span-2'
+          >
+            Add Player
+          </button>
+          <button 
+            onClick={handlePlayerReady}
+            className={`px-2 py-1 rounded text-xs col-span-2 ${
+              getCurrentPlayerReady() 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-gray-600 hover:bg-gray-700'
+            }`}
+          >
+            {getCurrentPlayerReady() ? 'Unready' : 'Ready Up'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
