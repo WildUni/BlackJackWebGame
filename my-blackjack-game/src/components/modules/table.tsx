@@ -1,121 +1,117 @@
 import React from 'react'
-import './style.css'
-import DealerSection from './DealerSection';
-import PlayerSection from './PlayerSection';
-import PlayerControls from './playerControls';
+import DealerSection from './DealerSection'
+import PlayerSection from './PlayerSection'
+import PlayerControls from './playerControls'
 
-const Table = (props:{hands:Array<{playerName:string, handValue:number, betValue:number, selected:boolean, owns:boolean,}>}) => {
-  const {hands} = props;
-  return (
-    <div className='table'>
-      <div className='table-container'>
-        {/* Dealer Section */}
-        {/*<DealerSection hands = {hands}></DealerSection>*/}
+const Table = (props: {
+  hands: Array<{
+    playerName: string
+    handValue: number
+    betValue: number
+    selected: boolean
+    owns: boolean
+  }>
+  gameState: "WAITING" | "BETTING" | "CIRCULATING" | "REVEAL"
+  playerName: string
+  owns: boolean
+  onPlayerReady?: () => void
+  isPlayerReady?: boolean
+  allReady?: boolean
+  players?: Array<{
+    playerName: string
+    balance: number
+    ready: boolean
+  }>
+}) => {
+  const { hands, gameState, playerName, owns, onPlayerReady, isPlayerReady, allReady } = props
+  
+  // Mock dealer data - this would come from your game state
+  const dealerHands = [{
+    playerName: "Dealer",
+    selected: false,
+    owns: false,
+    handValue: 17,
+    betValue: 0
+  }]
 
-        {/* Players Section */}
-        <PlayerSection playerID = {"dummy"} hands ={hands}></PlayerSection>
-
-        {/* Game Controls - Only show for current player */}
-        <PlayerControls playerID='DUMMY' handID={100} owns={true} gameState='BETTING'></PlayerControls>
+  // Render waiting room interface
+  const renderWaitingRoom = () => (
+    <>
+      {/* Dealer Section */}
+      <div className='flex-shrink-0 mt-4'>
+        <DealerSection hands={dealerHands} />
       </div>
-    </div>
+
+      {/* Players Section with Ready Indicators */}
+      <div className='flex-1 flex items-center justify-center w-full min-h-0'>
+        <PlayerSection playerID="dummy" hands={hands} players={props.players} />
+      </div>
+
+      {/* Ready Controls */}
+      <div className='flex-shrink-0 mb-2'>
+        <div className='flex flex-col items-center gap-4'>
+          {/* Ready Status Summary */}
+          <div className='bg-slate-700/50 backdrop-blur-sm px-4 py-2 rounded-lg border border-slate-600/50'>
+            <div className='text-center'>
+              <div className='text-white font-medium'>
+                {props.players?.filter(p => p.ready).length || 0} / {props.players?.length || 0} Players Ready
+              </div>
+            </div>
+          </div>
+          
+          {/* Ready Button */}
+          <button
+            onClick={onPlayerReady}
+            className={`px-6 py-3 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg ${
+              isPlayerReady
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+            }`}
+          >
+            {isPlayerReady ? '✓ Ready!' : 'Ready Up'}
+          </button>
+
+          {/* Status Message */}
+          {allReady && (
+            <div className='text-green-400 font-bold animate-pulse'>
+              🎮 Starting game...
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   )
 
+  // Render game table interface
+  const renderGameTable = () => (
+    <>
+      {/* Dealer Section */}
+      <div className='flex-shrink-0 mt-4'>
+        <DealerSection hands={dealerHands} />
+      </div>
 
+      {/* Players Section */}
+      <div className='flex-1 flex items-center justify-center w-full min-h-0'>
+        <PlayerSection playerID="dummy" hands={hands} />
+      </div>
+
+      {/* Game Controls */}
+      <div className='flex-shrink-0 mb-2'>
+        <PlayerControls 
+          playerName={playerName} 
+          owns={owns} 
+          gameState={gameState}
+        />
+      </div>
+    </>
+  )
+  
   return (
-    <div className='table'>
-      <div className='table-container'>
-        {/* Dealer Section */}
-        <div className='dealer-section'>
-          <div className='dealer-info'>
-            <h3 className='dealer-label'>Dealer</h3>
-            <div className='dealer-score'>Score: ?</div>
-          </div>
-          <div className='dealer-cards'>
-            <div className='card-placeholder'>🂠</div>
-            <div className='card-placeholder'>🂠</div>
-          </div>
-        </div>
-
-        {/* Players Section */}
-        <div className='players-section'>
-          {/* Player 1 */}
-          <div className='player-seat other-player current-player'>
-            <div className='player-cards'>
-              <div className='card-placeholder'>🂠</div>
-              <div className='card-placeholder'>🂠</div>
-            </div>
-            <div className='player-info'>
-              <div className='player-name'>Player 1</div>
-              <div className='player-score'>Score: 19</div>
-              <div className='player-bet'>Bet: $50</div>
-            </div>
-          </div>
-
-          {/* Player 2 (You) */}
-          <div className='player-seat current-player'>
-            <div className='player-cards'>
-              <div className='card-placeholder'>🂠</div>
-              <div className='card-placeholder'>🂠</div>
-            </div>
-            <div className='player-info'>
-              <div className='player-name'>You</div>
-              <div className='player-score'>Score: 16</div>
-              <div className='player-bet'>Bet: $100</div>
-            </div>
-          </div>
-
-          {/* Player 3 */}
-          <div className='player-seat'>
-            <div className='player-cards'>
-              <div className='card-placeholder'>🂠</div>
-              <div className='card-placeholder'>🂠</div>
-            </div>
-            <div className='player-info'>
-              <div className='player-name'>Player 3</div>
-              <div className='player-score'>Score: 21</div>
-              <div className='player-bet'>Bet: $25</div>
-            </div>
-          </div>
-
-          {/* Empty Seat */}
-          <div className='player-seat empty-seat'>
-            <div className='empty-seat-content'>
-              <div className='join-btn'>Join Game</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Game Status */}
-        <div className='game-status'>
-          <div className='status-message'>
-            Your turn - Hit or Stand?
-          </div>
-          <div className='turn-indicator'>
-            Player 2's Turn
-          </div>
-        </div>
-
-        {/* Game Controls - Only show for current player */}
-        <div className='game-controls'>
-          <button className='game-btn hit-btn'>Hit</button>
-          <button className='game-btn stand-btn'>Stand</button>
-          <button className='game-btn split-btn'>Split</button>
-        </div>
-
-        {/* Betting Area */}
-        <div className='betting-area'>
-          <div className='bet-info'>
-            <span className='bet-label'>Your Bet:</span>
-            <span className='bet-amount'>$100</span>
-          </div>
-          <div className='chip-controls'>
-            <button className='chip-btn'>$5</button>
-            <button className='chip-btn'>$25</button>
-            <button className='chip-btn'>$50</button>
-            <button className='chip-btn'>$100</button>
-          </div>
-        </div>
+    <div className='flex justify-center items-center h-screen w-screen p-0 m-0 bg-gradient-to-br from-slate-900 to-slate-800 fixed top-0 left-0 z-[1]'>
+      <div className='bg-slate-800/80 backdrop-blur-md border border-slate-600/50 rounded-3xl w-[90vw] h-[80vh] max-w-[1200px] max-h-[800px] flex flex-col items-center py-6 px-6 relative shadow-xl mt-20 gap-8'>
+        
+        {gameState === "WAITING" ? renderWaitingRoom() : renderGameTable()}
+        
       </div>
     </div>
   )
