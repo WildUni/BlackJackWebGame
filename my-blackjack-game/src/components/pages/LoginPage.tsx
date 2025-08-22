@@ -17,7 +17,7 @@ function LoginPage(){
         console.log("Joining as:", guestName);
         setPlayerName(guestName);
         setBalance(100);
-        navigate("/Home");
+        navigate("/home");
     }
     return (
     <div className="fixed inset-0 h-screen w-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6 overflow-hidden">
@@ -53,11 +53,21 @@ function LoginPage(){
                          focus:border-purple-500 focus:bg-white/10 focus:shadow-lg focus:shadow-purple-500/25"
             />
             <button
-            onClick={() => {handleGuestPlayer()}}
-            className="mt-8 block mx-auto bg-purple-600 hover:bg-purple-700 text-white font-semibold px-5 py-3 rounded-xl 
-               transition-all duration-300 shadow-md hover:shadow-purple-500/40">
+            onClick={handleGuestPlayer}
+            className="mt-8 block mx-auto bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-5 py-3 rounded-xl 
+                    transform transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-600 
+                    shadow-md  active:scale-95">
                 Play As Guest!
             </button>
+            </div>
+
+            {/* Footer */}
+              <div className="pt-5 border-t border-white/10 text-center">
+                <div className="flex flex-wrap justify-center gap-8 text-gray-400 text-sm font-medium">
+                  <span className="flex items-center gap-2">
+                   A BlackJack Multiplayer Game | Created By WildUni & tteoi
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -7,13 +7,15 @@ import Game from './pages/GameRoom';
 import NotFound from './pages/NotFound';
 import LoginPage from './pages/LoginPage';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route errorElement={<NotFound />} element={<App/>}>
     <Route path="/" element={<LoginPage/>}/>
-    <Route path="home" element={<Home/>}/>
+    <Route path="/home" element={<Home/>}/>
     <Route path="/room/:roomId" element={<Game/>}/>
+    <Route path="/profile" element={<Profile/>}/>
     </Route>
   )
 )
