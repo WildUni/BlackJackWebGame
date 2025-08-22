@@ -335,6 +335,33 @@ class GameRoom{
         this.hands.splice(this.selectionCounter, 1, newHands[0], newHands[1]);
     }
 
+
+
+
+    /*REVEAL*/
+
+    /**
+     * Evaluates all current hand: 
+     * updates the balance of players accordingly,
+     * if player wins, double the hand's betval
+     * if player ties, return the hand's betval
+     * if player loses, gets nothing
+     */
+    public evaluateWinner():void{
+        const dealerVal = this.getHandValue(this.dealer);
+        this.hands.forEach((hand)=>{
+            const handVal = this.getHandValue(hand.cards);
+            if(handVal <= 21){
+                const player = this.players.get(hand.playerName)??assert.fail();
+                if(handVal > dealerVal){
+                    player.balance += hand.betValue * 2;
+                }else if(handVal === dealerVal){
+                    player.balance += hand.betValue;
+                }
+            }
+        })
+    }
+
 }
 
 export default GameRoom;

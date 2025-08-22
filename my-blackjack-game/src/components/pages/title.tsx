@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Game from './game'
+import Game from './GameRoom'
 import '../modules/style.css'
 
 const Index = () => {
@@ -23,33 +23,12 @@ const Index = () => {
   if (showGame) {
     return <Game playerID={gameData.playerID} roomID={gameData.gameCode} />
   }
-
-  const generateGameCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase()
-  }
-
-  const handleStartNewGame = () => {
+    
+  const handleJoinGame = () => {    
     if (!playerName.trim()) {
       alert('Please enter your name!')
       return
     }
-    
-    const newGameCode = generateGameCode()
-    // Redirect to game page with parameters
-    window.location.href = `${window.location.pathname}?gameCode=${newGameCode}&playerID=${encodeURIComponent(playerName.trim())}`
-  }
-
-  const handleJoinGame = () => {
-    if (!gameCode.trim()) {
-      alert('Please enter a game code!')
-      return
-    }
-    
-    if (!playerName.trim()) {
-      alert('Please enter your name!')
-      return
-    }
-    
     // Redirect to game page with parameters
     window.location.href = `${window.location.pathname}?gameCode=${gameCode.trim()}&playerID=${encodeURIComponent(playerName.trim())}`
   }
@@ -59,7 +38,6 @@ const Index = () => {
       <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/10 max-w-lg w-full">
         {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 rounded-2xl animate-pulse"></div>
-        
         <div className="relative z-10">
           {/* Title Section */}
           <div className="text-center mb-6">
@@ -78,7 +56,7 @@ const Index = () => {
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Enter your display name"
+              placeholder="Enter your display name (Guest-)"
               maxLength={20}
               className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-5 py-3 text-white text-base 
                          font-medium tracking-wide placeholder-gray-500 outline-none transition-all duration-300

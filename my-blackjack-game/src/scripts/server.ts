@@ -152,6 +152,8 @@ io.on('connection', (socket) => {
         }
         if(game.getGameState() === "REVEAL"){
             game.dealerReveal();
+            game.evaluateWinner();
+            game.restartGame();
         }
         io.to(roomId).emit("gameUpdate", {
             game,

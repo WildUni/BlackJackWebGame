@@ -8,7 +8,7 @@ import Table from '../modules/table'
 interface GameState {
   roomID: string
   playerName: string
-  gamePhase: "WAITING" | "BETTING" | "DEALING" | "DISTRIBUTING" | "REVEAL" | "WIN"
+  gamePhase: "WAITING" | "BETTING" | "DEALING" | "DISTRIBUTING" | "REVEAL"
   hands: Array<{
     playerName: string
     handValue: number
@@ -29,7 +29,7 @@ interface GameState {
   }
 }
 
-const Game = (props: { playerID: string, roomID: string }) => {
+const Game = () => {
   const [gameState, setGameState] = useState<GameState>({
     roomID: props.roomID,
     playerName: props.playerID, // Use playerID as playerName for consistency
