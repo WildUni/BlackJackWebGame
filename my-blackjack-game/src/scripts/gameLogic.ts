@@ -192,7 +192,6 @@ class GameRoom{
             }
             info.balance -= info.currentBet;
         }
-        this.gameState = "DEALING";
     }
     
     /**
@@ -412,6 +411,15 @@ class GameRoom{
         })
     }
 
+    public startBettingPhase(){
+        this.gameState = "BETTING";
+    }
+    public startDealingPhase(){
+        this.gameState = "DEALING";
+    }
+    public startActingPhase(){
+        this.gameState = "ACTING";
+    }
 }
 
 export default GameRoom;

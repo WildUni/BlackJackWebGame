@@ -108,12 +108,22 @@ io.on('connection', (socket) => {
         const game = runningGames.get(roomId)??assert.fail("Games does not exist");
         game.changeReadyState(playerName);
         console.log(`🎯 Player ${playerName} is ${game.players.get(playerName)?.ready ? "ready": "un-ready"} in room "${roomId}"`);
+
         if(game.startBetting()){
+            game.startDealingPhase();
             setTimeout(()=>{
+                //end of betting, init hands with betsize
                 game.finalizePlayerBet();
+                game.initHands();
+                game.dealInitCards();
+                //ask for double down
                 io.to(roomId).emit("gameUpdate", {
-                displayData: game.getDisplayData()
+                    displayData: game.getDisplayData()
                 })
+                //handles double downs
+                setTimeout(()=>{
+                    game.startActingPhase();
+                }, 10000);
             }, 10000);
         };
         io.to(roomId).emit("gameUpdate", {
@@ -122,7 +132,6 @@ io.on('connection', (socket) => {
     });
 
     
-
     socket.on('player-bet', (roomId:string, betSize:number)=>{
         const game = runningGames.get(roomId)??assert.fail("Game does not exist ");
         assert(game.getGameState() === "BETTING", "Game not in betting state!");
