@@ -206,6 +206,9 @@ io.on('connection', (socket) => {
                     return;
                 }
                 break;
+            case "SPLIT":
+                game.playerSplitHand();
+                break;
         }
         
         const timer = runningTimers.get(roomId)?.get(playerName);

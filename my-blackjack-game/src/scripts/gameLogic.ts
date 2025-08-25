@@ -127,7 +127,6 @@ class GameRoom{
                 return false;
             }
         }
-        this.gameState = "BETTING";
         return true;
     }
     
@@ -235,6 +234,9 @@ class GameRoom{
                 this.incrementCounter();
             }
             this.giveDealerCard();
+        }
+        for(const hand of this.hands){
+            hand.betValue = this.getHandValue(hand.cards);
         }
     }
 
