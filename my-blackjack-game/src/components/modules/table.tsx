@@ -139,11 +139,11 @@ const Table = (props:{data:displayData, roomId:string}) => {
               case "BETTING":
                 return renderBetting();
               case "DEALING":
-                return renderGameTable();
+                return renderActing();
               case "ACTING":
                 return renderActing();
               case "REVEALING":
-                return props.data.hands && props.data.hands.length > 0 ? <PlayerSection players={players} hands={hands} handIndex={handIndex} winningHandIndex={winningHandIndex}/> : <div>Loading...</div>;
+                return ;
             }
           })()
         }
