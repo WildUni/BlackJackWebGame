@@ -1,7 +1,7 @@
 import {Card, Deck } from "./deck";
 import assert from "assert";
 import { gameConstants } from "./utils";
-import type {hand, playerInfo} from "./utils";
+import type {displayData, gameState, hand, playerInfo} from "./utils";
 
 
 class GameRoom{
@@ -10,16 +10,62 @@ class GameRoom{
     private dealer: Array<Card> = [];
     private hands: Array<hand> = [];
     private deck: Deck;
-    private gameState = "WAITING";
+    private gameState:gameState = "WAITING";
     private selectionCounter = 0;
     public readonly roomID:string;
-
+    private winningHandIndex:Array<number> = [];
     public constructor(roomID: string){
         this.roomID = roomID;
         this.deck = new Deck(gameConstants.NUM_DECKS);
     }
     
+    public getDisplayData():displayData{
 
+        const players = [];
+        for(const [playerName, info] of this.players){
+            players.push({
+                playerName,
+                balance:info.balance,
+                ready:info.ready,
+            })
+        }
+        const hands = [];
+        for(const hand of this.hands){
+            const cards: Array<string> = [];
+            for(const card of hand.cards){
+                cards.push(card.getSuit() + card.getNumericValue())
+            }
+            hands.push({
+                playerName:hand.playerName,
+                cards:cards,
+                handValue: hand.handValue,
+                betValue: hand.betValue
+            })
+        }
+        const gameState = this.gameState;
+        const handIndex = this.selectionCounter;
+        const dealerHand = []
+        if(this.dealer.length){
+            if(this.gameState != "REVEALING"){
+                dealerHand.push(this.dealer[0].getSuit() + this.dealer[0].getNumericValue())
+                dealerHand.push("HIDDEN")
+            }else{
+                for(const card of this.dealer){
+                    dealerHand.push(card.getSuit() + card.getNumericValue);
+                }
+            }
+    }
+
+        return{
+            players,
+            hands,
+            dealerHand, 
+            gameState,
+            handIndex, 
+            roomId: this.roomID,
+            winningHandIndex:this.winningHandIndex
+        }
+    }
 
     /*
     ROOM FUNCTIONS
@@ -90,7 +136,7 @@ class GameRoom{
                 return false
             }
         }
-        this.gameState = "DISTRIBUTING";
+        this.gameState = "DEALING";
         return true
     }
     
@@ -105,16 +151,29 @@ class GameRoom{
     /**
      * @returns The state of the current game WAITING, BETTING, DEALING, ACTING, REVEALING
      */
-    public getGameState():string{
+    public getGameState():gameState{
         return this.gameState;
     }
 
+    public getHands():Array<hand>{
+        return this.hands;
+    }
+
+    public getDealerHand():Array<Card>{
+        return this.dealer;
+    }
+
+    
     /**
      * 
      * @returns A number representing the number of players
      */
     public getNumPlayers():number{
         return this.players.size;
+    }
+
+    public getPlayersInfo():Map<string, playerInfo>{
+        return this.players;
     }
 
     /**
@@ -125,6 +184,10 @@ class GameRoom{
         return this.hands[this.selectionCounter].playerName;
     }
 
+
+    public getCurrentHandIndex():number{
+        return this.selectionCounter;
+    }
 
     /*Betting Phase*/
 
@@ -251,7 +314,7 @@ class GameRoom{
             this.selectionCounter += 1;
             this.selectionCounter %= this.hands.length;
             if(this.selectionCounter === 0 && this.checkForTermination()){
-                this.gameState = "REVEAL";
+                this.gameState = "REVEALING";
                 break;
             }
         }
@@ -349,12 +412,13 @@ class GameRoom{
      */
     public evaluateWinner():void{
         const dealerVal = this.getHandValue(this.dealer);
-        this.hands.forEach((hand)=>{
+        this.hands.forEach((hand, index)=>{
             const handVal = this.getHandValue(hand.cards);
             if(handVal <= 21){
                 const player = this.players.get(hand.playerName)??assert.fail();
                 if(handVal > dealerVal){
                     player.balance += hand.betValue * 2;
+                    this.winningHandIndex.push(index)
                 }else if(handVal === dealerVal){
                     player.balance += hand.betValue;
                 }

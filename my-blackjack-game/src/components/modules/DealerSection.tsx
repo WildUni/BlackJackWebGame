@@ -1,26 +1,18 @@
 import React from "react"
 import Hand from "./playerHand"
 
-const DealerSection = (props: {
-  hands: Array<{
-    playerName: string
-    selected: boolean
-    owns: boolean
-    handValue: number
-    betValue: number
-  }>
-}) => {
-  const { hands } = props
+const DealerSection = (props:{dealerHand:Array<string>}) => {
+  const { dealerHand } = props
   return (
     <div className="flex flex-col items-center gap-4">
-      {hands.map((hand, index) => (
+      {dealerHand.map((dealerHand, index) => (
         <Hand
           key={index}
-          playerName={hand.playerName}
-          selected={hand.selected}
-          owns={hand.owns}
-          handValue={hand.handValue}
-          betValue={hand.betValue}
+          playerName={"DEALER"}
+          selected={false}
+          owns={false}
+          handValue={0}
+          betValue={0}
         />
       ))}
     </div>

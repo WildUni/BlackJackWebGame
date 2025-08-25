@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Game from './GameRoom'
+import Game from './Game'
 import '../modules/style.css'
 
 const Index = () => {

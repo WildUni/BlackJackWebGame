@@ -40,12 +40,6 @@ console.log('🚀 Starting Blackjack server...');
 
 io.on('connection', (socket) => {
     const { playerName, balance } = socket.handshake.auth;
-    const playerInfo: playerInfo = {
-        playerName,
-        balance,
-        socket: socket.id,
-        ready:false
-    }
 
     console.log(`✅ Player ${playerName} connected:`, socket.id);
 
@@ -66,6 +60,12 @@ io.on('connection', (socket) => {
      * If player with same ID tries to rejoin a second time, replace current
      */
     socket.on('join-room', (roomID: string) => {
+        const playerInfo: playerInfo = {
+            playerName,
+            balance,
+            socket: socket.id,
+            ready:false
+        }
         let game = runningGames.get(roomID);
 
         if(!game){
@@ -93,11 +93,11 @@ io.on('connection', (socket) => {
         socket.join(roomID);
         game.addPlayer(playerInfo);
         console.log(`🎮 "${playerName}" joining room "${roomID}"`);
-
+        
         
         //sends update
         io.to(roomID).emit("gameUpdate", {
-            game,
+            displayData: game.getDisplayData()
         })
     })
 
@@ -112,7 +112,7 @@ io.on('connection', (socket) => {
             game.initBettingHands();
         }
         io.to(roomId).emit("gameUpdate", {
-            game,
+            displayData: game.getDisplayData()
         })
     });
 
@@ -121,7 +121,7 @@ io.on('connection', (socket) => {
         assert(game.getGameState() === "BETTING", "Game not in betting state!");
         game.addBet(playerName, betSize);
         io.to(roomId).emit("gameUpdate", {
-            game,
+            displayData: game.getDisplayData()
         })
     })
 
@@ -150,13 +150,15 @@ io.on('connection', (socket) => {
                 }
                 break;
         }
-        if(game.getGameState() === "REVEAL"){
+        if(game.getGameState() === "REVEALING"){
             game.dealerReveal();
             game.evaluateWinner();
             game.restartGame();
         }
+
+
         io.to(roomId).emit("gameUpdate", {
-            game,
+            displayData: game.getDisplayData()
         })  
     });
 
@@ -166,7 +168,7 @@ io.on('connection', (socket) => {
         game.removePlayer(playerName);
         socket.leave(roomId);
         io.to(roomId).emit("gameUpdate", {
-                game,
+            displayData:game.getDisplayData()
         });
     });
 
