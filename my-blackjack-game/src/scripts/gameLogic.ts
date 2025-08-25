@@ -229,6 +229,8 @@ class GameRoom{
 
 
     public dealInitCards():void{
+        console.log("Players", this.players)
+        console.log("Hands in play",this.hands);
         for(let i = 0; i < 2; i++){
             for(let j = 0; j < this.hands.length; j++){
                 this.givePlayerCard();
@@ -295,6 +297,7 @@ class GameRoom{
      */
     public incrementCounter(){
         this.selectionCounter += 1;
+        this.selectionCounter %= this.hands.length;
         while(!this.hands[this.selectionCounter].inPlay){
             this.selectionCounter += 1;
             this.selectionCounter %= this.hands.length;

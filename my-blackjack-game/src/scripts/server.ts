@@ -110,9 +110,9 @@ io.on('connection', (socket) => {
         console.log(`🎯 Player ${playerName} is ${game.players.get(playerName)?.ready ? "ready": "un-ready"} in room "${roomId}"`);
 
         if(game.startBetting()){
-            game.startDealingPhase();
             setTimeout(()=>{
                 //end of betting, init hands with betsize
+                game.startDealingPhase();
                 game.finalizePlayerBet();
                 game.initHands();
                 game.dealInitCards();
