@@ -37,6 +37,22 @@ async function leaveAllPublic(socket: import("socket.io").Socket) {
 }
 
 console.log('🚀 Starting Blackjack server...');
+const handRevealAndRestart = (game: GameRoom)=>{
+    console.log(`game ${game.roomID} has ended!`)
+    game.dealerReveal();
+    game.evaluateWinner();
+    io.to(game.roomID).emit("gameUpdate", {
+        displayData: game.getDisplayData()
+    })
+
+    setTimeout(()=>{
+        game.restartGame();
+        io.to(game.roomID).emit("gameUpdate", {
+            displayData: game.getDisplayData()
+        })
+    })
+}
+
 
 
 const handleActionPhase = (game: GameRoom) =>{
@@ -44,26 +60,12 @@ const handleActionPhase = (game: GameRoom) =>{
         return;
     }
     console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
-    console.log(game.getHands())
     const playerName = game.getCurrentPlayerName();
     const timer = setTimeout(()=>{
         game.standAction();
         runningTimers.get(game.roomID)?.delete(playerName);
         if(game.getGameState() === "REVEALING"){
-            console.log(`game ${game.roomID} has ended!`)
-            game.dealerReveal();
-            game.evaluateWinner();
-            io.to(game.roomID).emit("gameUpdate", {
-                displayData: game.getDisplayData()
-            })
-
-            setTimeout(()=>{
-                game.restartGame();
-                io.to(game.roomID).emit("gameUpdate", {
-                    displayData: game.getDisplayData()
-                })
-            }, gameConstants.REVEALING_TIMER)
-            
+            handRevealAndRestart(game);
         }
         handleActionPhase(game);
     }, gameConstants.ACTING_TIMER)
@@ -185,6 +187,7 @@ io.on('connection', (socket) => {
 
     socket.on('player-action', (roomId: string, action:string) => {
         const game = runningGames.get(roomId)??assert.fail("Game not found!");
+
         switch(action){
             case "HIT":
                 game.hitAction()
@@ -216,15 +219,7 @@ io.on('connection', (socket) => {
         runningTimers.get(roomId)?.delete(playerName);
 
         if(game.getGameState() === "REVEALING"){
-            console.log(`game ${game.roomID} has ended!`)
-            game.dealerReveal();
-            game.evaluateWinner();
-            setTimeout(() => {
-                game.restartGame();
-                io.to(roomId).emit("gameUpdate", {
-                    displayData: game.getDisplayData()
-                }) 
-            }, 10000);
+            handRevealAndRestart(game);
         }
 
         io.to(roomId).emit("gameUpdate", {
