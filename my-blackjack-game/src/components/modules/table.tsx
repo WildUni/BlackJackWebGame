@@ -26,17 +26,6 @@ const Table = (props:{data:displayData, roomId:string}) => {
   })
   const handInPlay = hands[handIndex];
 
-
-  const checkGamePhase = () => {
-    if (gameState === "WAITING") {
-      renderWaitingRoom();
-    } else if (gameState === "BETTING") {
-      renderBetting();
-    } else {
-      renderGameTable();
-    }
-  }
-
   const renderWaitingRoom = () => (
     <>
       {/* Dealer Section
@@ -106,7 +95,7 @@ const Table = (props:{data:displayData, roomId:string}) => {
       <div className='flex-shrink-0 mb-2 px-4'>
         <PlayerControls 
           playerName={playerName} 
-          owns={handInPlay.playerName === playerName} 
+          
           gameState={gameState}
           roomId={roomId}
         />
@@ -124,7 +113,6 @@ const Table = (props:{data:displayData, roomId:string}) => {
 
       <div className="w-full flex justify-center px-2">
         <BettingArea
-          owns={handInPlay.playerName === playerName}
           gameState={gameState}
           roomId={roomId}
         />

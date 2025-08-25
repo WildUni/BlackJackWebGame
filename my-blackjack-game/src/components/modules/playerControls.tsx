@@ -3,26 +3,25 @@ import BettingArea from "./bettingArea"
 
 const PlayerControls = (props: {
   playerName: string
-  owns: boolean
   gameState: string
+  roomId: string
 }) => {
-  const { playerName, owns, gameState } = props
-  
+  const { playerName, gameState, roomId } = props
+
   switch (gameState) {
     case "BETTING":
       return (
         <div className="w-full flex justify-center px-2">
           <BettingArea
-            playerName={playerName}
-            owns={owns}
             gameState={gameState}
+            roomId={roomId}
           />
         </div>
       )
     case "CIRCULATING":
       const controlTypes = [StandButton, HitButton, DoubleButton]
       
-      return owns ? (
+      return (
         <div className="flex flex-col sm:flex-row gap-2 md:gap-3 flex-wrap justify-center items-center w-full px-2">
           <div className="flex gap-2 md:gap-3">
             {controlTypes.map((ControlComponent, index) => (
@@ -33,10 +32,6 @@ const PlayerControls = (props: {
               />
             ))}
           </div>
-        </div>
-      ) : (
-        <div className="text-white text-center text-sm md:text-base px-4">
-          <p>Waiting for {playerName} to take their turn</p>
         </div>
       )
     case "REVEAL":
