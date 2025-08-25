@@ -36,7 +36,7 @@ export type playerInfo = {
         //     winningHandIndex:this.winningHandIndex
         // }
 export type displayData = {
-    players:Array<{playerName:string, balance:number, ready:boolean}>,
+    players:Array<{playerName:string, balance:number, ready:boolean, currentBet:number}>,
     hands:Array<{playerName:string, cards:Array<string>, handValue:number, betValue:number}>,
     dealerHand:Array<string>,
     gameState:gameState,

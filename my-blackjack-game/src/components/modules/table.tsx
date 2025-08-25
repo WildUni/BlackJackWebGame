@@ -26,6 +26,16 @@ const Table = (props:{data:displayData, roomId:string}) => {
   const handInPlay = hands[handIndex];
 
 
+  const checkGamePhase = () => {
+    if (gameState === "WAITING") {
+      renderWaitingRoom();
+    } else if (gameState === "BETTING") {
+      renderBetting();
+    } else {
+      renderGameTable();
+    }
+  }
+
   const renderWaitingRoom = () => (
     <>
       {/* Dealer Section
@@ -103,11 +113,17 @@ const Table = (props:{data:displayData, roomId:string}) => {
   )
   
   const renderBetting = () => {
-    
+    return <>
+      <div className='flex w-full justify-around'>
+        {players.map((player, index)=>(
+          <PlayerInfoBox key={index} playerName={player.playerName} balance={player.balance} isPlayerReady={player.ready}/>
+        ))}
+      </div>
+    </>;
   }
 
   const renderActing = () =>{
-    
+    return <></>;
   }
 
   
@@ -115,8 +131,16 @@ const Table = (props:{data:displayData, roomId:string}) => {
     <div className='flex justify-center items-center min-h-screen w-screen p-2 md:p-0 m-0 bg-gradient-to-br from-slate-900 to-slate-800 fixed top-0 left-0 z-[1]'>
       <div className='bg-slate-800/80 backdrop-blur-md border border-slate-600/50 rounded-2xl md:rounded-3xl w-full md:w-[90vw] h-[calc(100vh-1rem)] md:h-[80vh] max-w-[1200px] max-h-[800px] flex flex-col items-center py-3 md:py-6 px-3 md:px-6 relative shadow-xl mt-16 md:mt-20 gap-4 md:gap-8'>
 
-        {gameState === "WAITING" ? renderWaitingRoom() : renderGameTable()}
+        {
+          gameState === "WAITING"
+            ? renderWaitingRoom()
+            : gameState === "BETTING"
+              ? renderBetting()
+              : renderGameTable()
+        }
+
         
+
       </div>
     </div>
   )
