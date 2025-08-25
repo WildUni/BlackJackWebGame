@@ -142,7 +142,8 @@ const Table = (props:{data:displayData, roomId:string}) => {
                 return renderGameTable();
               case "ACTING":
                 return renderActing();
-              
+              case "REVEALING":
+                return props.data.hands && props.data.hands.length > 0 ? <PlayerSection players={players} hands={hands} handIndex={handIndex} winningHandIndex={winningHandIndex}/> : <div>Loading...</div>;
             }
           })()
         }

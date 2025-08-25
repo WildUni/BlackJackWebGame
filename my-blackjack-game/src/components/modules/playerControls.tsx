@@ -1,5 +1,8 @@
 import React from "react"
 import BettingArea from "./bettingArea"
+import { useGameSocket } from '../client-socket'
+
+
 
 const PlayerControls = (props: {
   playerName: string
@@ -29,6 +32,7 @@ const PlayerControls = (props: {
                 key={index}
                 playerName={playerName}
                 gameState={gameState}
+                roomId={roomId}
               />
             ))}
           </div>
@@ -61,9 +65,14 @@ const DoubleButton = (props: {
 const HitButton = (props: {
   playerName: string
   gameState: string
+  roomId: string
 }) => {
+  const {playerAction} = useGameSocket();
   return (
-    <button className='py-2 md:py-3 px-3 md:px-4 border-none rounded-md text-xs md:text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider min-w-[60px] md:min-w-[70px] bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 hover:transform hover:-translate-y-0.5 active:scale-95'>
+    <button className='py-2 md:py-3 px-3 md:px-4 border-none rounded-md text-xs md:text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider min-w-[60px] md:min-w-[70px] bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 hover:transform hover:-translate-y-0.5 active:scale-95'
+    onClick={() => {
+      playerAction(props.roomId , "HIT");
+    }}>
       Hit
     </button>
   )
@@ -72,9 +81,15 @@ const HitButton = (props: {
 const StandButton = (props: {
   playerName: string
   gameState: string
+  roomId: string
 }) => {
+  const {playerAction} = useGameSocket();
   return (
-    <button className='py-2 md:py-3 px-3 md:px-4 border-none rounded-md text-xs md:text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider min-w-[60px] md:min-w-[70px] bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 hover:transform hover:-translate-y-0.5 active:scale-95'>
+    <button className='py-2 md:py-3 px-3 md:px-4 border-none rounded-md text-xs md:text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider min-w-[60px] md:min-w-[70px] bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 hover:transform hover:-translate-y-0.5 active:scale-95'
+      onClick={() => {
+        console.log(props.roomId)
+      playerAction(props.roomId , "STAND");
+    }}>
       Stand
     </button>
   )
