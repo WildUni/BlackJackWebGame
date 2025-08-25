@@ -27,6 +27,7 @@ class GameRoom{
                 playerName,
                 balance:info.balance,
                 ready:info.ready,
+                currentBet: info.currentBet
             })
         }
         const hands = [];
@@ -55,7 +56,6 @@ class GameRoom{
                 }
             }
     }
-
         return{
             players,
             hands,
@@ -96,6 +96,10 @@ class GameRoom{
         this.hands = [];
         this.selectionCounter = 0;
         this.gameState = "WAITING";
+        for(const [_, info] of this.players){
+            info.ready = false;
+            info.currentBet = 0;
+        }
     }
 
     /**
@@ -114,30 +118,17 @@ class GameRoom{
     */
 
     /**
-     * Checks the readiness of all players
-     * @returns true iff all players are ready
+     * starts the betting pase if all players are ready
+     * @returns true iff all players are ready to enter the bettin phase
      */
-    public checkAllReady():boolean{
+    public startBetting():boolean{
         for(const [ _ , info] of this.players){
             if(!info.ready){
                 return false;
             }
         }
+        this.gameState = "BETTING";
         return true;
-    }
-
-
-    /**
-     * @returns true if all players have added their bets, updates game state if all bets are add
-     */
-    public checkBets(){
-        for(const hand of this.hands){
-            if(!hand.betValue){
-                return false
-            }
-        }
-        this.gameState = "DEALING";
-        return true
     }
     
     /**
@@ -192,57 +183,52 @@ class GameRoom{
     /*Betting Phase*/
 
     /**
-    * Adds new player hands, allowing players to bet
-    * Only allows player to add bet to one hand.
-    */
-    public initBettingHands(){
-        this.gameState = "BETTING";
-        for(const [playerName, _]  of this.players){
-            const newHand:hand = {
-                playerName:playerName,
-                cards: [],
-                handValue: 0,
-                betValue: 0,
-                inPlay: true
+     * Finalize player bets, for player with positive balance, set bet to min bet size, and subtract from player balance
+     */
+    public finalizePlayerBet(){
+        for(const [_, info] of this.players){
+            if(!info.currentBet && info.balance){
+                info.currentBet = gameConstants.MIN_BETSIZE;
             }
-            this.hands.push(newHand);
+            info.balance -= info.currentBet;
         }
+        this.gameState = "DEALING";
     }
     
     /**
      * Called whenever player wants to add bet during the initial betting phase.
      * Function should not be called after betting phase
     */
-    public addBet(playerID: string, betSize: number):void{
+    public setPlayerBet(playerID: string, betSize: number):void{
         const player = this.players.get(playerID)??assert.fail("Player does not exist");
-        assert(player.balance >= betSize, new Error("INSUIFFICIENT BALANCE"));
-        player.balance -= betSize;
-        for(const hand of this.hands){
-            if(hand.playerName === playerID){
-                hand.betValue += betSize;
-                break;
-            }
-        }
-    }
-
-    /**
-     * Force bets for players who have not betted
-     */
-    public forceMinBet(){
-        for(const hand of this.hands){
-            if(!hand.betValue){
-                const player = this.players.get(hand.playerName)??assert.fail("player not found");
-                player.balance -= gameConstants.MIN_BETSIZE;
-                hand.betValue += gameConstants.MIN_BETSIZE;
-            }
-        }
-        this.gameState = "DEALING";
+        player.currentBet = Math.min(betSize, player.balance);
     }
 
 
     /*
     Dealing
     */
+
+
+    /**
+    * Init hands for all players with a positive current bet in game
+    */
+    public initHands(){
+        for(const [playerName, info]  of this.players){
+            if(info.currentBet){
+                const newHand:hand = {
+                playerName:playerName,
+                cards: [],
+                handValue: 0,
+                betValue: info.currentBet,
+                inPlay: true
+                }
+                this.hands.push(newHand);
+            }
+        }
+    }
+
+
     public dealInitCards():void{
         for(let i = 0; i < 2; i++){
             for(let j = 0; j < this.hands.length; j++){

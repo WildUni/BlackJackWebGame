@@ -22,19 +22,11 @@ export type hand = {
 export type playerInfo = {
     playerName:string, 
     balance: number, 
+    currentBet: number,
     socket:string, 
-    ready:boolean
+    ready:boolean,
 }
 
-        // return{
-        //     players,
-        //     hands,
-        //     dealerHand, 
-        //     gameState,
-        //     handIndex, 
-        //     roomId: this.roomID,
-        //     winningHandIndex:this.winningHandIndex
-        // }
 export type displayData = {
     players:Array<{playerName:string, balance:number, ready:boolean, currentBet:number}>,
     hands:Array<{playerName:string, cards:Array<string>, handValue:number, betValue:number}>,
