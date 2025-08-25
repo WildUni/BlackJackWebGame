@@ -1,10 +1,11 @@
 import React, { useState } from "react"
+import { useGameSocket } from '../client-socket'
 
 const BettingArea = (props: {
-  playerName: string
   owns: boolean
   gameState: string
   playerBalance?: number
+  roomId: string
 }) => {
   const [currentBet, setCurrentBet] = useState(25)
   const [customAmount, setCustomAmount] = useState("")
@@ -12,7 +13,8 @@ const BettingArea = (props: {
   const [isExpanded, setIsExpanded] = useState(false)
   const balance = props.playerBalance || 1000
   const chipValues = [5, 25, 50, 100]
-  
+  const {addBet} = useGameSocket();
+
   const handleCustomBet = () => {
     const amount = parseInt(customAmount)
     if (amount >= 5 && amount <= balance) {
@@ -137,6 +139,7 @@ const BettingArea = (props: {
         onClick={() => {
           console.log(`Placing bet of $${currentBet}`)
           setIsExpanded(false) // Close after placing bet
+          addBet(props.roomId, currentBet)
         }}
         className='w-full py-2 md:py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-bold transition-all duration-200 hover:scale-105 text-sm md:text-base'
       >

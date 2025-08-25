@@ -1,5 +1,5 @@
-function PlayerInfoBox(props: { playerName: string; balance: number; isPlayerReady: boolean; currentBet: number}) {
-  const { playerName, balance, isPlayerReady } = props;
+function PlayerInfoBox(props: { playerName: string; balance: number; isPlayerReady: boolean; currentBet: number; gameState: string }) {
+  const { playerName, balance, isPlayerReady, currentBet, gameState } = props;
 
   return (
     <div
@@ -44,7 +44,7 @@ function PlayerInfoBox(props: { playerName: string; balance: number; isPlayerRea
 
         {/* Current Bet */}
         <div className="text-amber-300/90 font-medium">
-          Current Bet: {props.currentBet}
+          {gameState === 'WAITING' ? 'Waiting for players...' : `Current Bet: ${currentBet !== undefined ? currentBet : 0}`}
         </div>
       </div>
     </div>

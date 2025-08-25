@@ -5,6 +5,7 @@ import type { displayData } from '../../scripts/utils'
 import { usePlayer } from '../player-context'
 import { useGameSocket } from '../client-socket'
 import PlayerInfoBox from './PlayerInfo'
+import BettingArea from './bettingArea'
 const Table = (props:{data:displayData, roomId:string}) => {
 
   //what do we need: dealer data, player info, hand info, game state, curr player, current hand.
@@ -50,7 +51,7 @@ const Table = (props:{data:displayData, roomId:string}) => {
 
       <div className='flex w-full justify-around'>
         {players.map((player, index)=>(
-          <PlayerInfoBox key={index} playerName={player.playerName} balance={player.balance} isPlayerReady={player.ready}/>
+          <PlayerInfoBox key={index} playerName={player.playerName} balance={player.balance} isPlayerReady={player.ready} currentBet={player.currentBet} gameState={gameState} />
         ))}
       </div>
       {/* Ready Controls */}
@@ -107,6 +108,7 @@ const Table = (props:{data:displayData, roomId:string}) => {
           playerName={playerName} 
           owns={handInPlay.playerName === playerName} 
           gameState={gameState}
+          roomId={roomId}
         />
       </div>
     </>
@@ -116,8 +118,16 @@ const Table = (props:{data:displayData, roomId:string}) => {
     return <>
       <div className='flex w-full justify-around'>
         {players.map((player, index)=>(
-          <PlayerInfoBox key={index} playerName={player.playerName} balance={player.balance} isPlayerReady={player.ready}/>
+          <PlayerInfoBox key={index} playerName={player.playerName} balance={player.balance} isPlayerReady={player.ready} currentBet={player.currentBet} gameState={gameState} />
         ))}
+      </div>
+
+      <div className="w-full flex justify-center px-2">
+        <BettingArea
+          owns={handInPlay.playerName === playerName}
+          gameState={gameState}
+          roomId={roomId}
+        />
       </div>
     </>;
   }
