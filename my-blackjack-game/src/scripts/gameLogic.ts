@@ -136,7 +136,7 @@ class GameRoom{
      * should be called when an iteration is complete
      */
     public checkForTermination():boolean{
-        return this.hands.every(hand => hand.inPlay);
+        return this.hands.every(hand => !hand.inPlay);
     }
     
     /**
@@ -331,7 +331,7 @@ class GameRoom{
      */
     public standAction(){
         const hand = this.hands[this.selectionCounter];
-        hand.inPlay == false;
+        hand.inPlay = false;
         this.incrementCounter();
     }
 

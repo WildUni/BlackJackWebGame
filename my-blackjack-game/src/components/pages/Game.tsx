@@ -31,7 +31,7 @@ const Game = () => {
 
     //if not game room, we can display a waiting message, else we display the game room
     if(data){
-        console.log(data["players"]);
+        console.log(data.gameState, data.hands[data.handIndex]);
         const {players, hands, roomId, handIndex}= data;
         let gameState = data.gameState;
         let numPlayersReady = 0;
@@ -148,7 +148,6 @@ const Game = () => {
         </div>
       )
     }else{
-      console.log(data);
       return <></>;
     }
 }

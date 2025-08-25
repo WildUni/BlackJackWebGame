@@ -5,7 +5,7 @@ import type { Socket } from "socket.io";
 import type { playerInfo } from "./utils";
 import assert from "assert";
 import GameRoom from "./gameLogic";
-
+import { gameConstants } from "./utils";
 
 const playerToSocket = new Map<string, Socket>();
 
@@ -44,6 +44,7 @@ const handleActionPhase = (game: GameRoom) =>{
         return;
     }
     console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
+    console.log(game.getHands())
     const playerName = game.getCurrentPlayerName();
     const timer = setTimeout(()=>{
         game.standAction();
@@ -52,10 +53,20 @@ const handleActionPhase = (game: GameRoom) =>{
             console.log(`game ${game.roomID} has ended!`)
             game.dealerReveal();
             game.evaluateWinner();
-            game.restartGame();
+            io.to(game.roomID).emit("gameUpdate", {
+                displayData: game.getDisplayData()
+            })
+
+            setTimeout(()=>{
+                game.restartGame();
+                io.to(game.roomID).emit("gameUpdate", {
+                    displayData: game.getDisplayData()
+                })
+            }, gameConstants.REVEALING_TIMER)
+            
         }
         handleActionPhase(game);
-    }, 10000)
+    }, gameConstants.ACTING_TIMER)
     runningTimers.get(game.roomID)?.set(playerName, timer);
 }
 
@@ -153,8 +164,8 @@ io.on('connection', (socket) => {
                         displayData: game.getDisplayData()
                     })
                     handleActionPhase(game);
-                }, 10000);
-            }, 10000);
+                }, gameConstants.DEALING_TIMER);
+            }, gameConstants.BETTING_TIMER);
         };
         io.to(roomId).emit("gameUpdate", {
             displayData: game.getDisplayData()
@@ -205,13 +216,19 @@ io.on('connection', (socket) => {
             console.log(`game ${game.roomID} has ended!`)
             game.dealerReveal();
             game.evaluateWinner();
-            game.restartGame();
+            setTimeout(() => {
+                game.restartGame();
+                io.to(roomId).emit("gameUpdate", {
+                    displayData: game.getDisplayData()
+                }) 
+            }, 10000);
         }
-
 
         io.to(roomId).emit("gameUpdate", {
             displayData: game.getDisplayData()
         })  
+
+        
     });
 
     socket.on('leave-room', (roomId:string) => {

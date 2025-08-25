@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import { useGameSocket } from '../client-socket'
 
 const BettingArea = (props: {
-  owns: boolean
   gameState: string
   playerBalance?: number
   roomId: string

@@ -7,7 +7,11 @@ export const gameConstants = {
     MAX_WAIT_TIME: 10000,
     NUM_DECKS: 2, 
     MIN_BETSIZE: 1, 
-    MIN_DEALER_VAL: 17
+    MIN_DEALER_VAL: 17,
+    BETTING_TIMER:5000,
+    DEALING_TIMER:5000,
+    ACTING_TIMER:5000,
+    REVEALING_TIMER:5000
 }
 
 export type gameState = "WAITING" | "BETTING" | "DEALING" | "ACTING"| "REVEALING";
