@@ -127,7 +127,6 @@ class GameRoom{
                 return false;
             }
         }
-        this.gameState = "BETTING";
         return true;
     }
     
@@ -235,6 +234,9 @@ class GameRoom{
                 this.incrementCounter();
             }
             this.giveDealerCard();
+        }
+        for(const hand of this.hands){
+            hand.handValue = this.getHandValue(hand.cards);
         }
     }
 
@@ -345,8 +347,8 @@ class GameRoom{
         const hand = this.hands[this.selectionCounter];
         const player = this.players.get(hand.playerName)??assert.fail("Player does not exist");
         if(player.balance >= hand.betValue){
-            hand.betValue += hand.betValue;
             player.balance -= hand.betValue;
+            hand.betValue += hand.betValue;
         }else{
             throw new Error("Insuifficient Balance")
         }
@@ -424,6 +426,10 @@ class GameRoom{
     }
     public startActingPhase(){
         this.gameState = "ACTING";
+    }
+
+    public winnerData(){
+        
     }
 }
 
