@@ -18,7 +18,7 @@ const PlayerControls = (props: {
           />
         </div>
       )
-    case "CIRCULATING":
+    case "ACTING":
       const controlTypes = [StandButton, HitButton, DoubleButton]
       
       return (
@@ -41,7 +41,9 @@ const PlayerControls = (props: {
         </div>
       )
     default:
-      return null
+      return (<div className="text-red-500 p-4">
+        Unknown gameState: "{gameState}" (Type: {typeof gameState})
+      </div>)
   }
 }
 

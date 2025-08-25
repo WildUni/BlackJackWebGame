@@ -90,16 +90,6 @@ const Table = (props:{data:displayData, roomId:string}) => {
       <div className='flex-1 flex items-center justify-center w-full min-h-0 px-2'>
         <PlayerSection players={players} hands={hands} handIndex={handIndex}/>
       </div>
-
-      {/* Game Controls */}
-      <div className='flex-shrink-0 mb-2 px-4'>
-        <PlayerControls 
-          playerName={playerName} 
-          
-          gameState={gameState}
-          roomId={roomId}
-        />
-      </div>
     </>
   )
   
@@ -121,7 +111,18 @@ const Table = (props:{data:displayData, roomId:string}) => {
   }
 
   const renderActing = () =>{
-    return <></>;
+    return <>
+    {renderGameTable()}
+      {/* Game Controls */}
+      <div className='flex-shrink-0 mb-2 px-4'>
+        <PlayerControls 
+          playerName={playerName} 
+          gameState={gameState}
+          roomId={roomId}
+        />
+      </div>
+
+    </>;
   }
 
   
@@ -130,14 +131,21 @@ const Table = (props:{data:displayData, roomId:string}) => {
       <div className='bg-slate-800/80 backdrop-blur-md border border-slate-600/50 rounded-2xl md:rounded-3xl w-full md:w-[90vw] h-[calc(100vh-1rem)] md:h-[80vh] max-w-[1200px] max-h-[800px] flex flex-col items-center py-3 md:py-6 px-3 md:px-6 relative shadow-xl mt-16 md:mt-20 gap-4 md:gap-8'>
 
         {
-          gameState === "WAITING"
-            ? renderWaitingRoom()
-            : gameState === "BETTING"
-              ? renderBetting()
-              : renderGameTable()
+          (() => {
+            console.log("Game State:", gameState);
+            switch (gameState) {
+              case "WAITING":
+                return renderWaitingRoom();
+              case "BETTING":
+                return renderBetting();
+              case "DEALING":
+                return renderGameTable();
+              case "ACTING":
+                return renderActing();
+              
+            }
+          })()
         }
-
-        
 
       </div>
     </div>
