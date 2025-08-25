@@ -25,6 +25,7 @@ const io = new Server(server, {
 
 
 const runningGames = new Map<string, GameRoom>();
+const runningTimers = new Map<string, Map<string, NodeJS.Timeout>>();
 const MAX_NUM_PLAYERS = 3;
 //Some room management functions
 async function leaveAllPublic(socket: import("socket.io").Socket) {
@@ -36,6 +37,29 @@ async function leaveAllPublic(socket: import("socket.io").Socket) {
 }
 
 console.log('🚀 Starting Blackjack server...');
+
+
+const handleActionPhase = (game: GameRoom) =>{
+    if(game.getGameState() !== "ACTING"){
+        return;
+    }
+    console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
+    const playerName = game.getCurrentPlayerName();
+    const timer = setTimeout(()=>{
+        game.standAction();
+        runningTimers.get(game.roomID)?.delete(playerName);
+        if(game.getGameState() === "REVEALING"){
+            console.log(`game ${game.roomID} has ended!`)
+            game.dealerReveal();
+            game.evaluateWinner();
+            game.restartGame();
+        }
+        handleActionPhase(game);
+    }, 10000)
+    runningTimers.get(game.roomID)?.set(playerName, timer);
+}
+
+
 
 
 io.on('connection', (socket) => {
@@ -113,6 +137,7 @@ io.on('connection', (socket) => {
             setTimeout(()=>{
                 //end of betting, init hands with betsize
                 game.startDealingPhase();
+                console.log(`Game ${roomId} started dealing phase`)
                 game.finalizePlayerBet();
                 game.initHands();
                 game.dealInitCards();
@@ -123,6 +148,11 @@ io.on('connection', (socket) => {
                 //handles double downs
                 setTimeout(()=>{
                     game.startActingPhase();
+                    console.log(`Game ${roomId} started acting phase`)
+                    io.to(roomId).emit("gameUpdate", {
+                        displayData: game.getDisplayData()
+                    })
+                    handleActionPhase(game);
                 }, 10000);
             }, 10000);
         };
@@ -166,7 +196,13 @@ io.on('connection', (socket) => {
                 }
                 break;
         }
+        
+        const timer = runningTimers.get(roomId)?.get(playerName);
+        clearTimeout(timer);
+        runningTimers.get(roomId)?.delete(playerName);
+
         if(game.getGameState() === "REVEALING"){
+            console.log(`game ${game.roomID} has ended!`)
             game.dealerReveal();
             game.evaluateWinner();
             game.restartGame();

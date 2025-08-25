@@ -32,5 +32,11 @@ export function useGameSocket() {
     });
   }
 
+  function listenForSocketError(func:(msg : {type:string, reason: string})=>void){
+    socket?.on("Error", (msg : {type:string, reason: string}) =>{
+      func(msg);
+    })
+  }
+
   return { joinRoom, updateReadyStatus, addBet, playerAction, leaveRoom, setUpGameListener };
 }
