@@ -1,6 +1,5 @@
 import type { displayData } from "../scripts/utils";
 import { usePlayer } from "./player-context";
-import assert from "assert";
 
 export function useGameSocket() {
   const { socket } = usePlayer();

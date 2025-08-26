@@ -34,7 +34,7 @@ class GameRoom{
         for(const hand of this.hands){
             const cards: Array<string> = [];
             for(const card of hand.cards){
-                cards.push(card.getSuit() + card.getNumericValue())
+                cards.push(card.getValue() + card.getSuit())
             }
             hands.push({
                 playerName:hand.playerName,
@@ -48,11 +48,11 @@ class GameRoom{
         const dealerHand = []
         if(this.dealer.length){
             if(this.gameState != "REVEALING"){
-                dealerHand.push(this.dealer[0].getSuit() + this.dealer[0].getNumericValue())
+                dealerHand.push(this.dealer[0].getValue() + this.dealer[0].getSuit())
                 dealerHand.push("HIDDEN")
             }else{
                 for(const card of this.dealer){
-                    dealerHand.push(card.getSuit() + card.getNumericValue);
+                    dealerHand.push(card.getValue() + card.getSuit());
                 }
             }
         }

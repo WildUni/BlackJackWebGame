@@ -1,18 +1,20 @@
 import React from "react"
 import Hand from "./playerHand"
+import type{ displayHand } from "../../scripts/utils"
 
 const DealerSection = (props:{dealerHand:Array<string>}) => {
   const { dealerHand } = props
+  const dealerHandProp = {playerName:"DEALER",
+    cards: dealerHand,
+    handValue: 0,
+    betValue: 0,
+  }
   return (
     <div className="flex flex-col items-center gap-4">
       <Hand
-        key="dealer-hand"
-        playerName={"DEALER"}
+        hand={dealerHandProp}
         selected={false}
-        handValue={0} // You might want to calculate this based on dealerHand
-        betValue={0}
-        // If your Hand component expects individual cards, you might need to modify how you pass them
-        // OR render the cards directly in this component instead of using Hand
+        result = {"L"}
       />
     </div>
   )
