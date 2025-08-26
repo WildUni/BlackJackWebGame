@@ -10,7 +10,7 @@ import { DoubleButton } from './playerControls'
 const Table = (props:{data:displayData, roomId:string}) => {
 
   //what do we need: dealer data, player info, hand info, game state, curr player, current hand.
-  const {players, hands, gameState, dealerHand, handIndex, winningHandIndex} = props.data;
+  const {players, hands, gameState, dealerHand, handIndex, handResult} = props.data;
   const roomId = props.roomId;
   const {playerName, balance} = usePlayer();
   const {updateReadyStatus} = useGameSocket();

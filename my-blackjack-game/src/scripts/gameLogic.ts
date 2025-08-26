@@ -13,7 +13,7 @@ class GameRoom{
     private gameState:gameState = "WAITING";
     private selectionCounter = 0;
     public readonly roomId:string;
-    private winningHandIndex:Array<number> = [];
+    private handResult:Array<"W" | "T" | "L"> = [];
     public constructor(roomID: string){
         this.roomId = roomID;
         this.deck = new Deck(gameConstants.NUM_DECKS);
@@ -55,7 +55,7 @@ class GameRoom{
                     dealerHand.push(card.getSuit() + card.getNumericValue);
                 }
             }
-    }
+        }
         return{
             players,
             hands,
@@ -63,7 +63,7 @@ class GameRoom{
             gameState,
             handIndex, 
             roomId: this.roomId,
-            winningHandIndex:this.winningHandIndex
+            handResult:this.handResult
         }
     }
 
@@ -239,7 +239,7 @@ class GameRoom{
         }
         for(const hand of this.hands){
             hand.handValue = this.getHandValue(hand.cards);
-            hand.inPlay = hand.handValue === 21;
+            hand.inPlay = hand.handValue != 21;
         }
         assert(this.hands.length, "No hands were dealt because no one was able to place a bet");
     }
@@ -360,12 +360,13 @@ class GameRoom{
 
     /**
      * Splits the hand at current index into two one card piles.
+     * @Error if there are more than 2 cards in hand, or if the two card don't share the same value;
      */
     public playerSplitHand(){
         
         const hand = this.hands[this.selectionCounter];
         
-        assert(hand.cards[0].getValue() === hand.cards[1].getValue(), "Cards do not have the same card value");
+        assert(hand.cards.length === 2 && hand.cards[0].getValue() === hand.cards[1].getValue(), "Cards do not have the same card value");
 
         const newHands = [];
         const {playerName, cards, betValue} = hand;
@@ -408,17 +409,26 @@ class GameRoom{
      */
     public evaluateWinner():void{
         const dealerVal = this.getHandValue(this.dealer);  
-        this.hands.forEach((hand, index)=>{
+        this.hands.forEach((hand)=>{
             const handVal = this.getHandValue(hand.cards);
             const player = this.players.get(hand.playerName)??assert.fail();
-            if(dealerVal > 21 && handVal <= 21) player.balance += hand.betValue * 2;
-            else if(handVal <= 21){
-                if(handVal > dealerVal){
+            if(dealerVal > 21){
+                if(handVal <= 21){
                     player.balance += hand.betValue * 2;
-                    this.winningHandIndex.push(index)
-                }else if(handVal === dealerVal){
-                    player.balance += hand.betValue;
-                }
+                    this.handResult.push("W");
+                }else this.handResult.push("L");
+            }else{
+                if(handVal <= 21){
+                    if(handVal > dealerVal){
+                        player.balance += hand.betValue * 2;
+                        this.handResult.push("W");
+                    }else if(handVal === dealerVal){
+                        player.balance += hand.betValue;
+                        this.handResult.push("T")
+                    }else{
+                        this.handResult.push("L");
+                    }
+                }else this.handResult.push("L");
             }
         })
     }

@@ -27,6 +27,7 @@ const io = new Server(server, {
 const runningGames = new Map<string, GameRoom>();
 const runningTimers = new Map<string, NodeJS.Timeout>();
 const MAX_NUM_PLAYERS = 3;
+
 //Some room management functions
 async function leaveAllPublic(socket: import("socket.io").Socket) {
   for (const r of socket.rooms) {
@@ -39,57 +40,54 @@ async function leaveAllPublic(socket: import("socket.io").Socket) {
 console.log('🚀 Starting Blackjack server...');
 
 
-
-
-const handleReveal = (game:GameRoom) =>{
-    game.dealerReveal();
-    game.evaluateWinner();
-    sendGameData(game.roomId, game);
-}
-
-const restartGame = (game:GameRoom) =>{
-    game.restartGame();
-    sendGameData(game.roomId, game);
-}
-
-const handRevealAndRestart = (game: GameRoom)=>{
-    handleReveal(game);
-    console.log(`Game ${game.roomId} is revealing!`)
-    const dealerHand = game.getDealerHand();
-    console.log(game.getHandValue(dealerHand));
-    setTimeout(()=>restartGame(game), gameConstants.REVEALING_TIMER)
-    console.log(`Game ${game.roomId} has ended and is restarting!`)
-
-}
-
-
-
-const handleActionPhase = (game: GameRoom) =>{
-    if(game.getGameState() !== "ACTING"){
-        return;
-    }
-    console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
-
-    const timer = setTimeout(()=>{
-        game.standAction();
-        runningTimers.delete(game.roomId);
-        if(game.getGameState() === "REVEALING"){
-            handRevealAndRestart(game);
-        }
-        handleActionPhase(game);
-    }, gameConstants.ACTING_TIMER)
-    runningTimers.set(game.roomId, timer);
-}
-
-const sendGameData = (roomId:string, game:GameRoom)=>{
-    io.to(roomId).emit("gameUpdate", {
-        displayData: game.getDisplayData()
-    })
-}
-
-
 io.on('connection', (socket) => {
-    const { playerName, balance } = socket.handshake.auth;
+    const { playerName } = socket.handshake.auth;
+    let { balance } = socket.handshake.auth;
+    const handleReveal = (game:GameRoom) =>{
+        game.dealerReveal();
+        game.evaluateWinner();
+        balance = game.getPlayersInfo().get(playerName)?.balance;
+        sendGameData(game.roomId, game);
+    }
+
+    const restartGame = (game:GameRoom) =>{
+        game.restartGame();
+        sendGameData(game.roomId, game);
+    }
+
+    const handRevealAndRestart = (game: GameRoom)=>{
+        handleReveal(game);
+        console.log(`Game ${game.roomId} is revealing!`)
+        const dealerHand = game.getDealerHand();
+        console.log(game.getHandValue(dealerHand));
+        setTimeout(()=>restartGame(game), gameConstants.REVEALING_TIMER)
+        console.log(`Game ${game.roomId} has ended and is restarting!`)
+    }
+
+
+
+    const handleActionPhase = (game: GameRoom) =>{
+        if(game.getGameState() !== "ACTING"){
+            return;
+        }
+        console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
+
+        const timer = setTimeout(()=>{
+            game.standAction();
+            runningTimers.delete(game.roomId);
+            if(game.getGameState() === "REVEALING"){
+                handRevealAndRestart(game);
+            }
+            handleActionPhase(game);
+        }, gameConstants.ACTING_TIMER)
+        runningTimers.set(game.roomId, timer);
+    }
+
+    const sendGameData = (roomId:string, game:GameRoom)=>{
+        io.to(roomId).emit("gameUpdate", {
+            displayData: game.getDisplayData()
+        })
+    }
 
     console.log(`✅ Player ${playerName} connected:`, socket.id);
 
@@ -212,7 +210,7 @@ io.on('connection', (socket) => {
                 break;
             case "DOUBLE":
                 try{
-                    game.doubleDownAction();
+                    game.doubleDownAction(playerName);
                 }catch(e){
                     return;
                 }

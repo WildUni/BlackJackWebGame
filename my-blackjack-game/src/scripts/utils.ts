@@ -42,6 +42,6 @@ export type displayData = {
     gameState:gameState,
     handIndex:number,
     roomId:string,
-    winningHandIndex:Array<number>
+    handResult:Array<"W" | "T" | "L">
     
 }
