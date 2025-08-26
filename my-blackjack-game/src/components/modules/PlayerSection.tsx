@@ -3,12 +3,17 @@ import Hand from "./playerHand"
 import type { displayData } from "../../scripts/utils"
 import { usePlayer } from "../player-context"
 
-const PlayerSection = (props: {players:Array<{playerName:string, balance:number, ready:boolean}>,
-   hands:Array<{playerName:string, cards:Array<string>, handValue:number, betValue:number}>, 
-   handIndex:number}) => {
+const PlayerSection = (props: {
+  players: Array<{playerName: string, balance: number, ready: boolean}>,
+  hands: Array<{playerName: string, cards: Array<string>, handValue: number, betValue: number}>, 
+  handIndex: number,
+  gameState?: string,
+  winningHandIndex?: Array<number>
+}) => {
   
-  const { hands, players, handIndex} = props
-  const {playerName} = usePlayer();
+  const { hands, players, handIndex, gameState, winningHandIndex } = props
+  const { playerName } = usePlayer();
+  
   return (
     <div className="w-full">
       {/* Mobile: Stack vertically on small screens, flex on larger screens */}
@@ -19,6 +24,12 @@ const PlayerSection = (props: {players:Array<{playerName:string, balance:number,
           const isReady = player?.ready || false
           const selected = index === handIndex;
           const owns = hand.playerName === playerName;
+          
+          // Check if this hand is a winner during revealing state
+          const isWinner = gameState === 'REVEALING' && 
+                          winningHandIndex && 
+                          winningHandIndex.includes(index);
+          
           return (
             <div key={index} className="flex justify-center">
               <Hand
@@ -28,6 +39,7 @@ const PlayerSection = (props: {players:Array<{playerName:string, balance:number,
                 handValue={hand.handValue}
                 betValue={hand.betValue}
                 isReady={isReady}
+                isWinner={isWinner}
               />
             </div>
           )
