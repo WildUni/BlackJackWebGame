@@ -8,10 +8,10 @@ const PlayerSection = (props: {
   hands: Array<{playerName: string, cards: Array<string>, handValue: number, betValue: number}>, 
   handIndex: number,
   gameState?: string,
-  winningHandIndex?: Array<number>
+  handResult?: Array<string>  // Changed from winningHandIndex to handResult
 }) => {
   
-  const { hands, players, handIndex, gameState, winningHandIndex } = props
+  const { hands, players, handIndex, gameState, handResult } = props  // Changed here too
   const { playerName } = usePlayer();
   
   return (
@@ -25,10 +25,10 @@ const PlayerSection = (props: {
           const selected = index === handIndex;
           const owns = hand.playerName === playerName;
           
-          // Check if this hand is a winner during revealing state
-          const isWinner = gameState === 'REVEALING' && 
-                          winningHandIndex && 
-                          winningHandIndex.includes(index);
+          // Check hand result during revealing state - UPDATED LOGIC
+          const handResultValue = gameState === 'REVEALING' && handResult ? handResult[index] : undefined;
+          const isWinner = handResultValue === "W";
+          const isTie = handResultValue === "T";
           
           return (
             <div key={index} className="flex justify-center">
@@ -40,6 +40,7 @@ const PlayerSection = (props: {
                 betValue={hand.betValue}
                 isReady={isReady}
                 isWinner={isWinner}
+                isTie={isTie}  // Added this prop
               />
             </div>
           )

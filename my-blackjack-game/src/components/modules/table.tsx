@@ -10,7 +10,7 @@ import { DoubleButton } from './playerControls'
 
 const Table = (props: { data: displayData, roomId: string }) => {
   // Extract data from props
-  const { players, hands, gameState, dealerHand, handIndex, winningHandIndex } = props.data;
+  const { players, hands, gameState, dealerHand, handIndex, handResult } = props.data;
   const roomId = props.roomId;
   const { playerName, balance } = usePlayer();
   const { updateReadyStatus } = useGameSocket();
@@ -80,7 +80,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
     </>
   );
 
-  const renderGameTable = () => (
+  const renderGameTable = (showWinners = false) => (
     <>
       {/* Dealer Section */}
       <div className='flex-shrink-0 mt-2 md:mt-4'>
@@ -94,7 +94,8 @@ const Table = (props: { data: displayData, roomId: string }) => {
           hands={hands} 
           handIndex={handIndex}
           gameState={gameState}
-          winningHandIndex={winningHandIndex}
+          handResult={handResult}
+          
         />
       </div>
     </>
@@ -155,21 +156,38 @@ const Table = (props: { data: displayData, roomId: string }) => {
   );
 
   const renderRevealing = () => {
-    // Check if dealer won (assuming winninghandindex is empty then dealer won)
-
-    console.log("Winning Hand Index:", winningHandIndex);
-    const dealerWon = winningHandIndex.length === 0;
+    // Count wins, losses, and ties
+    const wins = handResult?.filter(result => result === "W").length || 0;
+    const ties = handResult?.filter(result => result === "T").length || 0;
+    const losses = handResult?.filter(result => result === "L").length || 0;
 
     return (
       <>
-        {renderGameTable()}
+        {renderGameTable( true )}
 
         <div className="mt-4 flex flex-col items-center">
           <span className="text-lg font-bold text-white">
             Game Ended
           </span>
+          
+          {wins > 0 && (
+            <div className='text-green-400 font-bold text-sm md:text-base mt-2'>
+              {wins} Player{wins > 1 ? 's' : ''} Won!
+            </div>
+          )}
+          
+          {ties > 0 && (
+            <div className='text-yellow-400 font-bold text-sm md:text-base mt-2'>
+              {ties} Tie{ties > 1 ? 's' : ''}!
+            </div>
+          )}
+          
+          {losses > 0 && wins === 0 && ties === 0 && (
+            <div className='text-red-400 font-bold text-sm md:text-base mt-2'>
+              Dealer Wins All Hands!
+            </div>
+          )}
         </div>
-        
       </>
     );
   };
