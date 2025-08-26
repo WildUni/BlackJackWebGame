@@ -23,12 +23,14 @@ export function useGameSocket() {
 
   function leaveRoom(roomId: string) {
     socket?.emit("leave-room", roomId);
+    socket?.off("gameUpdate");
   }
 
   function setUpGameListener(func: (data: displayData) => void){
     socket?.on("gameUpdate", (game: {displayData:displayData}) => {
       console.log("received game room!")
       func(game.displayData);
+      console.log("gameUpdate listeners:", socket?.listeners("gameUpdate").length);
     });
   }
 

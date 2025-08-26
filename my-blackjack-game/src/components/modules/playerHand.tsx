@@ -8,7 +8,7 @@ const Hand = (props: {
   betValue: number
   isReady?: boolean
 }) => {
-  const { playerName, selected, owns, handValue, betValue, isReady } = props
+  const { playerName, selected, handValue, betValue, isReady } = props
   
   return (
     <div className={`flex flex-col items-center gap-2 md:gap-3 p-2 md:p-3 rounded-lg border-2 relative transition-all duration-200 min-w-[100px] max-w-[140px] ${

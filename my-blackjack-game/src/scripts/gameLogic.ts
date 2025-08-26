@@ -12,10 +12,10 @@ class GameRoom{
     private deck: Deck;
     private gameState:gameState = "WAITING";
     private selectionCounter = 0;
-    public readonly roomID:string;
+    public readonly roomId:string;
     private winningHandIndex:Array<number> = [];
     public constructor(roomID: string){
-        this.roomID = roomID;
+        this.roomId = roomID;
         this.deck = new Deck(gameConstants.NUM_DECKS);
     }
     
@@ -62,7 +62,7 @@ class GameRoom{
             dealerHand, 
             gameState,
             handIndex, 
-            roomId: this.roomID,
+            roomId: this.roomId,
             winningHandIndex:this.winningHandIndex
         }
     }
@@ -121,7 +121,7 @@ class GameRoom{
      * starts the betting pase if all players are ready
      * @returns true iff all players are ready to enter the bettin phase
      */
-    public startBetting():boolean{
+    public checkBetting():boolean{
         for(const [ _ , info] of this.players){
             if(!info.ready){
                 return false;
@@ -191,6 +191,7 @@ class GameRoom{
             }
             info.balance -= info.currentBet;
         }
+
     }
     
     /**
@@ -322,7 +323,7 @@ class GameRoom{
 
         hand.handValue = this.getHandValue(hand.cards);
         if(hand.handValue >= 21){
-            hand.inPlay == false;
+            hand.inPlay = false;
         }
         this.incrementCounter();
     }
@@ -418,14 +419,8 @@ class GameRoom{
         })
     }
 
-    public startBettingPhase(){
-        this.gameState = "BETTING";
-    }
-    public startDealingPhase(){
-        this.gameState = "DEALING";
-    }
-    public startActingPhase(){
-        this.gameState = "ACTING";
+    public setGameState(state:gameState){
+        this.gameState = state;
     }
 
     public winnerData(){

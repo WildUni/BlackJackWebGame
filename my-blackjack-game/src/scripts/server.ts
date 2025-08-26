@@ -25,7 +25,7 @@ const io = new Server(server, {
 
 
 const runningGames = new Map<string, GameRoom>();
-const runningTimers = new Map<string, Map<string, NodeJS.Timeout>>();
+const runningTimers = new Map<string, NodeJS.Timeout>();
 const MAX_NUM_PLAYERS = 3;
 //Some room management functions
 async function leaveAllPublic(socket: import("socket.io").Socket) {
@@ -37,20 +37,27 @@ async function leaveAllPublic(socket: import("socket.io").Socket) {
 }
 
 console.log('🚀 Starting Blackjack server...');
-const handRevealAndRestart = (game: GameRoom)=>{
-    console.log(`game ${game.roomID} has ended!`)
+
+
+
+
+const handleReveal = (game:GameRoom) =>{
     game.dealerReveal();
     game.evaluateWinner();
-    io.to(game.roomID).emit("gameUpdate", {
-        displayData: game.getDisplayData()
-    })
+    sendGameData(game.roomId, game);
+}
 
-    setTimeout(()=>{
-        game.restartGame();
-        io.to(game.roomID).emit("gameUpdate", {
-            displayData: game.getDisplayData()
-        })
-    })
+const restartGame = (game:GameRoom) =>{
+    game.restartGame();
+    sendGameData(game.roomId, game);
+}
+
+const handRevealAndRestart = (game: GameRoom)=>{
+    handleReveal(game);
+    console.log(`Game ${game.roomId} is revealing!`)
+    setTimeout(()=>restartGame(game), gameConstants.REVEALING_TIMER)
+    console.log(`Game ${game.roomId} has ended and is restarting!`)
+
 }
 
 
@@ -60,19 +67,22 @@ const handleActionPhase = (game: GameRoom) =>{
         return;
     }
     console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
-    const playerName = game.getCurrentPlayerName();
     const timer = setTimeout(()=>{
         game.standAction();
-        runningTimers.get(game.roomID)?.delete(playerName);
+        runningTimers.delete(game.roomId);
         if(game.getGameState() === "REVEALING"){
             handRevealAndRestart(game);
         }
         handleActionPhase(game);
     }, gameConstants.ACTING_TIMER)
-    runningTimers.get(game.roomID)?.set(playerName, timer);
+    runningTimers.set(game.roomId, timer);
 }
 
-
+const sendGameData = (roomId:string, game:GameRoom)=>{
+    io.to(roomId).emit("gameUpdate", {
+        displayData: game.getDisplayData()
+    })
+}
 
 
 io.on('connection', (socket) => {
@@ -96,7 +106,7 @@ io.on('connection', (socket) => {
      * If room is not in waiting state, reject join request
      * If player with same ID tries to rejoin a second time, replace current
      */
-    socket.on('join-room', (roomID: string) => {
+    socket.on('join-room', (roomId: string) => {
         const playerInfo: playerInfo = {
             playerName,
             balance,
@@ -104,19 +114,19 @@ io.on('connection', (socket) => {
             socket: socket.id,
             ready:false
         }
-        let game = runningGames.get(roomID);
+        let game = runningGames.get(roomId);
 
         if(!game){
-            game = new GameRoom(roomID);
-            runningGames.set(roomID, game);
+            game = new GameRoom(roomId);
+            runningGames.set(roomId, game);
         }
 
         //if player already exists, replace socket
         if(game.players.has(playerName)){
             const tempInfo: playerInfo = game.players.get(playerName)??assert.fail();
             tempInfo.socket = socket.id;
-            console.log(`🎮 "${playerName}" rejoining room "${roomID}"`);
-            socket.join(roomID);
+            console.log(`🎮 "${playerName}" rejoining room "${roomId}"`);
+            socket.join(roomId);
             return;       
         }
 
@@ -124,19 +134,17 @@ io.on('connection', (socket) => {
         //handles max capacity and invalid game state, should split into two checks!
         if(game.getGameState() != "WAITING" || game.getNumPlayers() >= MAX_NUM_PLAYERS){
             socket.emit("error-message", { code: "ROOM_FULL", message: `The can be a max of ${MAX_NUM_PLAYERS} players in the room at the same time`});
-            console.log(`🎮 "${playerName}" was declined from room "${roomID}"`);
+            console.log(`🎮 "${playerName}" was declined from room "${roomId}"`);
             return;
         }
         // Join the socket room
-        socket.join(roomID);
+        socket.join(roomId);
         game.addPlayer(playerInfo);
-        console.log(`🎮 "${playerName}" joining room "${roomID}"`);
+        console.log(`🎮 "${playerName}" joining room "${roomId}"`);
         
         
         //sends update
-        io.to(roomID).emit("gameUpdate", {
-            displayData: game.getDisplayData()
-        })
+        sendGameData(roomId, game);
     })
 
 
@@ -146,32 +154,36 @@ io.on('connection', (socket) => {
         game.changeReadyState(playerName);
         console.log(`🎯 Player ${playerName} is ${game.players.get(playerName)?.ready ? "ready": "un-ready"} in room "${roomId}"`);
 
-        if(game.startBetting()){
+        if(game.checkBetting()){
+            game.setGameState("BETTING");
             setTimeout(()=>{
                 //end of betting, init hands with betsize
-                game.startDealingPhase();
-                console.log(`Game ${roomId} started dealing phase`)
                 game.finalizePlayerBet();
-                game.initHands();
-                game.dealInitCards();
-                //ask for double down
-                io.to(roomId).emit("gameUpdate", {
-                    displayData: game.getDisplayData()
-                })
-                //handles double downs
-                setTimeout(()=>{
-                    game.startActingPhase();
-                    console.log(`Game ${roomId} started acting phase`)
-                    io.to(roomId).emit("gameUpdate", {
-                        displayData: game.getDisplayData()
-                    })
-                    handleActionPhase(game);
-                }, gameConstants.DEALING_TIMER);
+                try{
+                    game.setGameState("DEALING");
+                    console.log(`Game ${roomId} started dealing phase`)
+
+                    game.initHands();
+                    game.dealInitCards();
+
+                    //ask for double down
+                    sendGameData(roomId, game);
+
+                    //starting acting phase
+                    setTimeout(()=>{
+                        game.setGameState("ACTING");
+                        console.log(`Game ${roomId} started acting phase`)
+                        sendGameData(roomId, game);
+                        handleActionPhase(game);
+                    }, gameConstants.DEALING_TIMER);
+            }catch(e){
+                console.log("Game failed to start because no bet was placed")
+            }
+
             }, gameConstants.BETTING_TIMER);
         };
-        io.to(roomId).emit("gameUpdate", {
-            displayData: game.getDisplayData()
-        })
+
+        sendGameData(roomId, game);
     });
 
     
@@ -179,54 +191,46 @@ io.on('connection', (socket) => {
         const game = runningGames.get(roomId)??assert.fail("Game does not exist ");
         assert(game.getGameState() === "BETTING", "Game not in betting state!");
         game.setPlayerBet(playerName, betSize);
-        io.to(roomId).emit("gameUpdate", {
-            displayData: game.getDisplayData()
-        })
+        sendGameData(roomId, game);
     })
 
 
     socket.on('player-action', (roomId: string, action:string) => {
         const game = runningGames.get(roomId)??assert.fail("Game not found!");
-
         switch(action){
             case "HIT":
                 game.hitAction()
                 break;
             case "STAND":
+                console.log(game.getHands())
                 game.standAction();
                 break;
             case "DOUBLE":
                 try{
                     game.doubleDownAction();
                 }catch(e){
-                    const player = game.getCurrentPlayerName()??assert.fail();
-                    const playerSocket = playerToSocket.get(player)??assert.fail();
-                    playerSocket.emit("error", {
-                        code:"INVALID_ACTION",
-                        reason:"Insuifficient Balance!"
-                    })
-                    console.log("Insuifficient Balance! when trying to make a bet")
                     return;
                 }
                 break;
             case "SPLIT":
-                game.playerSplitHand();
+                try{
+                    game.playerSplitHand();
+                }catch(e){
+                    return;
+                }
+                
                 break;
         }
         
-        const timer = runningTimers.get(roomId)?.get(playerName);
+        const timer = runningTimers.get(roomId)
         clearTimeout(timer);
-        runningTimers.get(roomId)?.delete(playerName);
+        runningTimers.delete(roomId);
 
         if(game.getGameState() === "REVEALING"){
             handRevealAndRestart(game);
         }
 
-        io.to(roomId).emit("gameUpdate", {
-            displayData: game.getDisplayData()
-        })  
-
-        
+        sendGameData(roomId, game); 
     });
 
     socket.on('leave-room', (roomId:string) => {
@@ -234,9 +238,7 @@ io.on('connection', (socket) => {
         const game = runningGames.get(roomId)??assert.fail();
         game.removePlayer(playerName);
         socket.leave(roomId);
-        io.to(roomId).emit("gameUpdate", {
-            displayData:game.getDisplayData()
-        });
+        sendGameData(roomId, game);
     });
 
 

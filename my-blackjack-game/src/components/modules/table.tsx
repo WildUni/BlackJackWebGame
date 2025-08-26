@@ -6,12 +6,13 @@ import { usePlayer } from '../player-context'
 import { useGameSocket } from '../client-socket'
 import PlayerInfoBox from './PlayerInfo'
 import BettingArea from './bettingArea'
+import { DoubleButton } from './playerControls'
 const Table = (props:{data:displayData, roomId:string}) => {
 
   //what do we need: dealer data, player info, hand info, game state, curr player, current hand.
   const {players, hands, gameState, dealerHand, handIndex, winningHandIndex} = props.data;
   const roomId = props.roomId;
-  const {playerName} = usePlayer();
+  const {playerName, balance} = usePlayer();
   const {updateReadyStatus} = useGameSocket();
   
   let isThisPlayerReady = false;
@@ -24,6 +25,9 @@ const Table = (props:{data:displayData, roomId:string}) => {
       }
     }
   })
+
+
+
   const handInPlay = hands[handIndex];
 
   const renderWaitingRoom = () => (
@@ -105,9 +109,25 @@ const Table = (props:{data:displayData, roomId:string}) => {
         <BettingArea
           gameState={gameState}
           roomId={roomId}
+          balance = {balance}
         />
       </div>
     </>;
+  }
+
+  const renderDealing = () =>{
+    return <>
+    {renderGameTable()}
+    <div className="flex flex-col sm:flex-row gap-2 md:gap-3 flex-wrap justify-center items-center w-full px-2">
+          <div className="flex gap-2 md:gap-3">
+            <DoubleButton
+              gameState={gameState}
+              playerName={playerName}
+              roomId={roomId}
+            />
+          </div>
+        </div>
+    </>
   }
 
   const renderActing = () =>{
@@ -139,7 +159,7 @@ const Table = (props:{data:displayData, roomId:string}) => {
               case "BETTING":
                 return renderBetting();
               case "DEALING":
-                return renderActing();
+                return renderDealing();
               case "ACTING":
                 return renderActing();
               case "REVEALING":

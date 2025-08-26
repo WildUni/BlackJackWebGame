@@ -28,7 +28,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         });
         return;
     }
-    console.log(endpoint);
+    //console.log(endpoint);
     const s: Socket = io("http://localhost:3001", {
       transports: ["websocket"],
       auth: { playerName, balance }

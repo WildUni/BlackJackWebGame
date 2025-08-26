@@ -7,63 +7,25 @@ import { useGameSocket } from '../client-socket'
 const PlayerControls = (props: {
   playerName: string
   gameState: string
-  roomId: string
+  roomId: string,
 }) => {
-  const { playerName, gameState, roomId } = props
-
-  switch (gameState) {
-    case "BETTING":
-      return (
-        <div className="w-full flex justify-center px-2">
-          <BettingArea
-            gameState={gameState}
-            roomId={roomId}
-          />
-        </div>
-      )
-    case "DEALING":
-      return (
-        <div className="flex flex-col sm:flex-row gap-2 md:gap-3 flex-wrap justify-center items-center w-full px-2">
-          <div className="flex gap-2 md:gap-3">
-            <DoubleButton
-              gameState={gameState}
-              playerName={playerName}
-              roomId={roomId}
-            />
-          </div>
-        </div>
-      )
-    case "ACTING":
-      const controlTypes = [StandButton, HitButton]
-      
+  const { playerName, gameState, roomId} = props
+      const controlTypes = [StandButton, HitButton, SplitButton]
       return (
         <div className="flex flex-col sm:flex-row gap-2 md:gap-3 flex-wrap justify-center items-center w-full px-2">
           <div className="flex gap-2 md:gap-3">
             {controlTypes.map((ControlComponent, index) => (
               <ControlComponent
                 key={index}
-                playerName={playerName}
-                gameState={gameState}
                 roomId={roomId}
               />
             ))}
           </div>
         </div>
       )
-    case "REVEAL":
-      return (
-        <div className="text-white text-center text-sm md:text-base px-4">
-          <p>The Host is revealing their cards!</p>
-        </div>
-      )
-    default:
-      return (<div className="text-red-500 p-4">
-        Unknown gameState: "{gameState}" (Type: {typeof gameState})
-      </div>)
-  }
 }
 
-const DoubleButton = (props: {
+export const DoubleButton = (props: {
   gameState: string
   playerName: string
   roomId: string
@@ -80,8 +42,6 @@ const DoubleButton = (props: {
 }
 
 const HitButton = (props: {
-  playerName: string
-  gameState: string
   roomId: string
 }) => {
   const {playerAction} = useGameSocket();
@@ -96,8 +56,6 @@ const HitButton = (props: {
 }
 
 const StandButton = (props: {
-  playerName: string
-  gameState: string
   roomId: string
 }) => {
   const {playerAction} = useGameSocket();
@@ -111,5 +69,20 @@ const StandButton = (props: {
     </button>
   )
 }
+
+const SplitButton = (props: {
+  roomId: string
+}) => {
+  const {playerAction} = useGameSocket();
+  return (
+    <button className='py-2 md:py-3 px-3 md:px-4 border-none rounded-md text-xs md:text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider min-w-[60px] md:min-w-[70px] bg-gradient-to-r from-yellow-500 to-yellow-400 text-black hover:from-yellow-600 hover:to-yellow-500 hover:transform hover:-translate-y-0.5 active:scale-95'
+    onClick={() => {
+      playerAction(props.roomId , "SPLIT");
+    }}>
+      Split
+    </button>
+  )
+}
+
 
 export default PlayerControls
