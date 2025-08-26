@@ -34,6 +34,7 @@ export type playerInfo = {
 
 export type displayPlayer = {playerName:string, balance:number, ready:boolean, currentBet:number}
 export type displayHand = {playerName:string, cards:Array<string>, handValue:number, betValue:number}
+
 export type displayData = {
     players:Array<displayPlayer>,
     hands:Array<displayHand>,

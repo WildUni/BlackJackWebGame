@@ -55,6 +55,8 @@ const restartGame = (game:GameRoom) =>{
 const handRevealAndRestart = (game: GameRoom)=>{
     handleReveal(game);
     console.log(`Game ${game.roomId} is revealing!`)
+    const dealerHand = game.getDealerHand();
+    console.log(game.getHandValue(dealerHand));
     setTimeout(()=>restartGame(game), gameConstants.REVEALING_TIMER)
     console.log(`Game ${game.roomId} has ended and is restarting!`)
 
@@ -67,6 +69,7 @@ const handleActionPhase = (game: GameRoom) =>{
         return;
     }
     console.log(`Player ${game.getCurrentPlayerName()} is choosing an action`)
+
     const timer = setTimeout(()=>{
         game.standAction();
         runningTimers.delete(game.roomId);
@@ -177,7 +180,9 @@ io.on('connection', (socket) => {
                         handleActionPhase(game);
                     }, gameConstants.DEALING_TIMER);
             }catch(e){
+                game.setGameState("WAITING");
                 console.log("Game failed to start because no bet was placed")
+                sendGameData(roomId, game);
             }
 
             }, gameConstants.BETTING_TIMER);
@@ -235,10 +240,14 @@ io.on('connection', (socket) => {
 
     socket.on('leave-room', (roomId:string) => {
         console.log(`❌ Player  ${playerName} left room ${roomId}`);
+        try{
         const game = runningGames.get(roomId)??assert.fail();
         game.removePlayer(playerName);
         socket.leave(roomId);
         sendGameData(roomId, game);
+        }catch(e){
+            return
+        }
     });
 
 

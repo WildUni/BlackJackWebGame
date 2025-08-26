@@ -225,6 +225,7 @@ class GameRoom{
                 this.hands.push(newHand);
             }
         }
+        assert(this.hands.length, "No hands were initialized because no one was able to place a bet");
     }
 
 
@@ -238,7 +239,9 @@ class GameRoom{
         }
         for(const hand of this.hands){
             hand.handValue = this.getHandValue(hand.cards);
+            hand.inPlay = hand.handValue === 21;
         }
+        assert(this.hands.length, "No hands were dealt because no one was able to place a bet");
     }
 
     /*
@@ -340,14 +343,14 @@ class GameRoom{
 
     
     /**
-     * Handles double down for the current hand. 
+     * Handles double down for the current player
      * Function can only be called in dealing phase
      * @throws error if player can not perform a double down with their current money
      */
-    public doubleDownAction():void{
-        const hand = this.hands[this.selectionCounter];
-        const player = this.players.get(hand.playerName)??assert.fail("Player does not exist");
-        if(player.balance >= hand.betValue){
+    public doubleDownAction(playerName:string):void{
+        const hand = this.hands.find(hand=>hand.playerName === playerName)??assert.fail("Player does not have a hand in play");
+        const player = this.players.get(playerName)??assert.fail("Missing Player");
+        if(hand.inPlay && player.balance >= hand.betValue){
             player.balance -= hand.betValue;
             hand.betValue += hand.betValue;
         }else{
@@ -404,11 +407,12 @@ class GameRoom{
      * if player loses, gets nothing
      */
     public evaluateWinner():void{
-        const dealerVal = this.getHandValue(this.dealer);
+        const dealerVal = this.getHandValue(this.dealer);  
         this.hands.forEach((hand, index)=>{
             const handVal = this.getHandValue(hand.cards);
-            if(handVal <= 21){
-                const player = this.players.get(hand.playerName)??assert.fail();
+            const player = this.players.get(hand.playerName)??assert.fail();
+            if(dealerVal > 21 && handVal <= 21) player.balance += hand.betValue * 2;
+            else if(handVal <= 21){
                 if(handVal > dealerVal){
                     player.balance += hand.betValue * 2;
                     this.winningHandIndex.push(index)
