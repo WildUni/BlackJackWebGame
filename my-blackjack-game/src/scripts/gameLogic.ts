@@ -225,6 +225,7 @@ class GameRoom{
                 this.hands.push(newHand);
             }
         }
+        assert(this.hands.length, "No hands were initialized because no one was able to place a bet");
     }
 
 
@@ -239,6 +240,7 @@ class GameRoom{
         for(const hand of this.hands){
             hand.handValue = this.getHandValue(hand.cards);
         }
+        assert(this.hands.length, "No hands were dealt because no one was able to place a bet");
     }
 
     /*
@@ -404,11 +406,12 @@ class GameRoom{
      * if player loses, gets nothing
      */
     public evaluateWinner():void{
-        const dealerVal = this.getHandValue(this.dealer);
+        const dealerVal = this.getHandValue(this.dealer);  
         this.hands.forEach((hand, index)=>{
             const handVal = this.getHandValue(hand.cards);
-            if(handVal <= 21){
-                const player = this.players.get(hand.playerName)??assert.fail();
+            const player = this.players.get(hand.playerName)??assert.fail();
+            if(dealerVal > 21 && handVal <= 21) player.balance += hand.betValue * 2;
+            else if(handVal <= 21){
                 if(handVal > dealerVal){
                     player.balance += hand.betValue * 2;
                     this.winningHandIndex.push(index)
