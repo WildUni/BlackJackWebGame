@@ -239,7 +239,7 @@ class GameRoom{
         }
         for(const hand of this.hands){
             hand.handValue = this.getHandValue(hand.cards);
-            hand.inPlay = hand.handValue === 21;
+            hand.inPlay = hand.handValue !== 21;
         }
         assert(this.hands.length, "No hands were dealt because no one was able to place a bet");
     }

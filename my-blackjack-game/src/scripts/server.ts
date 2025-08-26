@@ -212,7 +212,7 @@ io.on('connection', (socket) => {
                 break;
             case "DOUBLE":
                 try{
-                    game.doubleDownAction();
+                    game.doubleDownAction(playerName);
                 }catch(e){
                     return;
                 }

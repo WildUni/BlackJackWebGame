@@ -155,42 +155,21 @@ const Table = (props: { data: displayData, roomId: string }) => {
   );
 
   const renderRevealing = () => {
-    // Check if dealer won (assuming -1 or a specific value indicates dealer win)
-    const dealerWon = winningHandIndex && (
-      winningHandIndex.includes(-1) || 
-      winningHandIndex.length === 0 ||
-      winningHandIndex.some(index => index < 0)
-    );
+    // Check if dealer won (assuming winninghandindex is empty then dealer won)
+
+    console.log("Winning Hand Index:", winningHandIndex);
+    const dealerWon = winningHandIndex.length === 0;
 
     return (
       <>
         {renderGameTable()}
-        {/* Show results or winning information */}
-        <div className='flex-shrink-0 mb-2 px-4'>
-          <div className='text-center'>
-            <div className='text-white font-medium text-lg md:text-xl'>
-              Round Complete
-            </div>
-            
-            {dealerWon ? (
-              <div className='text-red-400 font-bold text-sm md:text-base mt-2'>
-                🏠 Dealer Wins!
-              </div>
-            ) : winningHandIndex && winningHandIndex.length > 0 ? (
-              <div className='text-green-400 font-bold text-sm md:text-base mt-2'>
-                🎉 {winningHandIndex.length === 1 ? (
-                  `Player Hand ${winningHandIndex[0] + 1} Wins!`
-                ) : (
-                  `Player Hands ${winningHandIndex.map(index => index + 1).join(', ')} Win!`
-                )}
-              </div>
-            ) : (
-              <div className='text-yellow-400 font-bold text-sm md:text-base mt-2'>
-                🤝 It's a Tie!
-              </div>
-            )}
-          </div>
+
+        <div className="mt-4 flex flex-col items-center">
+          <span className="text-lg font-bold text-white">
+            Game Ended
+          </span>
         </div>
+        
       </>
     );
   };
