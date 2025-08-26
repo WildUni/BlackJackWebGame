@@ -16,18 +16,12 @@ const PlayerSection = (props: {players:Array<{playerName:string, balance:number,
         {hands.map((hand, index) => {
           // Find player ready status
           const player = players?.find(p => p.playerName === hand.playerName)
-          const isReady = player?.ready || false
           const selected = index === handIndex;
-          const owns = hand.playerName === playerName;
           return (
             <div key={index} className="flex justify-center">
               <Hand
-                playerName={hand.playerName}
+                hand = {hand}
                 selected={selected}
-                owns={owns}
-                handValue={hand.handValue}
-                betValue={hand.betValue}
-                isReady={isReady}
               />
             </div>
           )

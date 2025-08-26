@@ -1,40 +1,32 @@
-import React from "react"
+import type { displayHand } from "../../scripts/utils"
 
-const Hand = (props: {
-  playerName: string
-  selected: boolean
-  owns: boolean
-  handValue: number
-  betValue: number
-  isReady?: boolean
-}) => {
-  const { playerName, selected, handValue, betValue, isReady } = props
+const Hand = (props: { 
+  hand: displayHand,
+  selected: boolean}) => {
+  const { hand, selected } = props
   
+  const {playerName, cards, betValue,handValue} = hand;
+
   return (
     <div className={`flex flex-col items-center gap-2 md:gap-3 p-2 md:p-3 rounded-lg border-2 relative transition-all duration-200 min-w-[100px] max-w-[140px] ${
       selected ? 'bg-slate-700/80 border-yellow-400' : 'bg-slate-800/60 border-slate-600'
     }`}>
-      
-      {/* Ready Indicator */}
-      {isReady !== undefined && (
-        <div className={`absolute -top-1 -right-1 md:-top-2 md:-right-2 w-4 h-4 md:w-6 md:h-6 rounded-full border-2 border-slate-800 flex items-center justify-center text-xs font-bold ${
-          isReady 
-            ? 'bg-green-500 text-white' 
-            : 'bg-gray-500 text-gray-300'
-        }`}>
-          {isReady ? '✓' : '○'}
+      <div className="relative flex items-center">
+      {cards.map((card, i) => (
+        <div
+          key={i}
+          className={`
+            w-14 h-20 flex items-center justify-center rounded-lg border 
+            bg-white shadow-md font-bold text-lg 
+            ${card.includes("h") || card.includes("d") ? "text-red-500" : "text-black"}
+            ${i >= 2 ? "-ml-10" : "ml-0"} 
+          `}
+          style={{ zIndex: i }}
+        >
+          {card}
         </div>
-      )}
-      
-      {/* Cards */}
-      <div className='flex gap-0.5 md:gap-1'>
-        <div className='w-6 h-9 md:w-8 md:h-12 bg-slate-100 rounded border border-slate-300 shadow-sm flex items-center justify-center text-sm md:text-lg'>
-          🂠
-        </div>
-        <div className='w-6 h-9 md:w-8 md:h-12 bg-slate-100 rounded border border-slate-300 shadow-sm flex items-center justify-center text-sm md:text-lg'>
-          🂠
-        </div>
-      </div>
+      ))}
+    </div>
       
       {/* Player Info */}
       <div className='text-center w-full'>

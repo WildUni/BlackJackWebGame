@@ -9,7 +9,6 @@ const DealerSection = (props:{dealerHand:Array<string>}) => {
         key="dealer-hand"
         playerName={"DEALER"}
         selected={false}
-        owns={false}
         handValue={0} // You might want to calculate this based on dealerHand
         betValue={0}
         // If your Hand component expects individual cards, you might need to modify how you pass them
