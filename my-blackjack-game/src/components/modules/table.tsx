@@ -7,6 +7,7 @@ import { useGameSocket } from '../client-socket'
 import PlayerInfoBox from './PlayerInfo'
 import BettingArea from './bettingArea'
 import { DoubleButton } from './playerControls'
+import Timer from './Timer'
 
 const Table = (props: { data: displayData, roomId: string }) => {
   // Extract data from props
@@ -101,6 +102,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
   
   const renderBetting = () => (
     <>
+      <Timer gameState={gameState} />
       <div className='flex w-full justify-around'>
         {players.map((player, index) => (
           <PlayerInfoBox 
@@ -127,6 +129,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
   const renderDealing = () => (
     <>
       {renderGameTable()}
+      <Timer gameState={gameState} />
       <div className="flex flex-col sm:flex-row gap-2 md:gap-3 flex-wrap justify-center items-center w-full px-2">
         <div className="flex gap-2 md:gap-3">
           <DoubleButton
@@ -142,6 +145,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
   const renderActing = () => (
     <>
       {renderGameTable()}
+      <Timer gameState={gameState} />
       {/* Game Controls */}
       <div className='flex-shrink-0 mb-2 px-4'>
         <PlayerControls 

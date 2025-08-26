@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import { useGameSocket } from '../client-socket'
 
 const BettingArea = (props: {
@@ -10,7 +10,7 @@ const BettingArea = (props: {
   const [customAmount, setCustomAmount] = useState("")
   const [showCustomInput, setShowCustomInput] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const balance = props.balance;
+  const balance = props.balance || 100
   const chipValues = [5, 25, 50, 100]
   const {addBet} = useGameSocket();
 
