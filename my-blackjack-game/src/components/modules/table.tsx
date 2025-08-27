@@ -9,11 +9,19 @@ import BettingArea from './bettingArea'
 import { DoubleButton } from './playerControls'
 import Timer from './Timer'
 
+/**
+ * Represents the table top:
+ * The table should display a row of player info boxes during the waiting and betting phase
+ * The table should display a row of player hands during the dealing, acting, and revealing phase.
+ * The table should only show controls to player that owns the current hand!
+ * @param props display data from the server side, as well as roomId as a string
+ * @returns 
+ */
 const Table = (props: { data: displayData, roomId: string }) => {
   // Extract data from props
   const { players, hands, gameState, dealerHand, handIndex, handResult } = props.data;
   const roomId = props.roomId;
-  const { playerName, balance } = usePlayer();
+  const { playerName} = usePlayer();
   const { updateReadyStatus } = useGameSocket();
   
   // Calculate ready status
@@ -28,8 +36,9 @@ const Table = (props: { data: displayData, roomId: string }) => {
     }
   });
 
-  const handInPlay = hands[handIndex];
-
+  /**
+   * @returns The table during the waiting phase
+   */
   const renderWaitingRoom = () => (
     <>
       {/* Player Info Boxes */}
@@ -41,7 +50,6 @@ const Table = (props: { data: displayData, roomId: string }) => {
             balance={player.balance} 
             isPlayerReady={player.ready} 
             currentBet={player.currentBet} 
-            gameState={gameState} 
           />
         ))}
       </div>
@@ -81,6 +89,10 @@ const Table = (props: { data: displayData, roomId: string }) => {
     </>
   );
 
+  /**
+   * The table should shown the dealer's hand, and the players hand
+   * @returns The table during the dealing/acting/revealing phase
+   */
   const renderGameTable = () => (
     <>
       {/* Dealer Section */}
@@ -100,6 +112,11 @@ const Table = (props: { data: displayData, roomId: string }) => {
     </>
   );
   
+
+  /**
+   * The table should display the player info boxes and the betting interface
+   * @returns the table during the betting phase 
+   */
   const renderBetting = () => (
     <>
       <Timer gameState={gameState} />
@@ -111,21 +128,23 @@ const Table = (props: { data: displayData, roomId: string }) => {
             balance={player.balance} 
             isPlayerReady={player.ready} 
             currentBet={player.currentBet} 
-            gameState={gameState} 
+
           />
         ))}
       </div>
 
       <div className="w-full flex justify-center px-2">
         <BettingArea
-          gameState={gameState}
           roomId={roomId}
-          balance={balance}
         />
       </div>
     </>
   );
 
+  /**
+   * The table should show dealer's cards, and players' hands, and the double down button
+   * @returns The table during the dealing phase
+   */
   const renderDealing = () => (
     <>
       {renderGameTable()}
@@ -133,8 +152,6 @@ const Table = (props: { data: displayData, roomId: string }) => {
       <div className="flex flex-col sm:flex-row gap-2 md:gap-3 flex-wrap justify-center items-center w-full px-2">
         <div className="flex gap-2 md:gap-3">
           <DoubleButton
-            gameState={gameState}
-            playerName={playerName}
             roomId={roomId}
           />
         </div>
@@ -142,6 +159,10 @@ const Table = (props: { data: displayData, roomId: string }) => {
     </>
   );
 
+  /**
+   * The table should show dealer's cards, and players' hands, and the player action interface
+   * @returns The table during the acting phase
+   */
   const renderActing = () => (
     <>
       {renderGameTable()}
@@ -149,24 +170,27 @@ const Table = (props: { data: displayData, roomId: string }) => {
       {/* Game Controls */}
       <div className='flex-shrink-0 mb-2 px-4'>
         <PlayerControls 
-          playerName={playerName} 
-          gameState={gameState}
           roomId={roomId}
         />
       </div>
     </>
   );
 
+
+  /**
+   * The table should show dealer's cards, and players' hands, and who won, etc
+   * @returns The table during the dealing phase
+   */
   const renderRevealing = () => {
     // Count wins, losses, and ties
-    const wins = handResult?.filter(result => result === "W").length || 0;
-    const ties = handResult?.filter(result => result === "T").length || 0;
-    const losses = handResult?.filter(result => result === "L").length || 0;
+    const wins = handResult.filter(result => result === "W").length || 0;
+    const ties = handResult.filter(result => result === "T").length || 0;
+    const losses = handResult.filter(result => result === "L").length || 0;
 
     return (
       <>
         {renderGameTable()}
-
+        
         <div className="mt-4 flex flex-col items-center">
           <span className="text-lg font-bold text-white">
             Game Ended

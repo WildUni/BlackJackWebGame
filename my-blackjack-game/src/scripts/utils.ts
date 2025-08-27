@@ -42,6 +42,16 @@ export type displayData = {
     gameState:gameState,
     handIndex:number,
     roomId:string,
-    handResult:Array<"W" | "T" | "L">
-    
+    handResult:Array<"W" | "T" | "L">    
+}
+
+export type socketErrorMsg = {
+    type:string,
+    description:string
+}
+
+export const socketErrorTypes = {
+    JOIN:"JOIN_ERROR",
+    DOUBLE:"DOUBLE_ERROR",
+    SPLIT: "SPLIT_ERROR"
 }

@@ -1,6 +1,4 @@
-import React from "react"
 import Hand from "./playerHand"
-import type{ displayHand } from "../../scripts/utils"
 
 const DealerSection = (props:{dealerHand:Array<string>}) => {
   const { dealerHand } = props

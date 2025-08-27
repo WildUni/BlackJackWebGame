@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { gameConstants } from '../../scripts/utils'
 
-const Header = (props: { roomID: string }) => {
+const Header = (props: { roomID: string, numPlayers:number}) => {
+
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const navigate = useNavigate()
-  const playerCount = 3 // This would come from props/state
-  const maxPlayers = 3
+  const playerCount = props.numPlayers // This would come from props/state
+  const maxPlayers = gameConstants.MAX_PLAYER_COUNT;
 
   const handleLeaveRoom = () => {
     if (confirm('Are you sure you want to leave the game?')) {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type {ReactNode} from "react";
 import { io, type Socket } from "socket.io-client";
+import { useGameSocket } from "./client-socket";
 
 type PlayerContextValue = {
   playerName: string;
@@ -40,6 +41,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     s.connect();
     setSocket(s);
+    // listenForSocketError();
 
     // cleanup: disconnect this instance if name changes/unmounts
     return () => {

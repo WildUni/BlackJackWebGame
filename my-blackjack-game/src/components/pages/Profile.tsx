@@ -2,6 +2,10 @@ import { useState } from "react";
 import { usePlayer } from "../player-context";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Still under progress: most fields are hard coded
+ * @returns The profile page
+ */
 function Profile() {
     const { playerName, setPlayerName, balance, setBalance } = usePlayer();
     const [newName, setNewName] = useState(playerName || "Guest-");

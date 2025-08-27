@@ -1,10 +1,10 @@
-import { PlayerProvider, usePlayer } from '../player-context'
+import { usePlayer } from '../player-context'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import '../modules/style.css'
 import Header from '../modules/header'
 import Table from '../modules/table'
-import {type displayData, type displayPlayer, type displayHand, type gameState} from '../../scripts/utils'
+import type { displayData } from '../../scripts/utils'
 import { useGameSocket } from '../client-socket'
 
 
@@ -13,16 +13,11 @@ const Game = () => {
   const nav = useNavigate();
   
   //importing sockets, handles joining, and leaving room, turns socket listener off when leaving
-  const {joinRoom, setUpGameListener, leaveRoom} = useGameSocket();
+  const {joinRoom, setUpGameListener, leaveRoom, listenForSocketError} = useGameSocket();
   
   //stores current display data
   const [data, setDisplayData] = useState<displayData | null>(null);
 
-  //breaking down display data
-  const [players, setPlayers] = useState<Array<displayPlayer>>([]);
-  const [hands, setHands] = useState<Array<displayHand>>([]);
-  const [gameState, setGameState] = useState<gameState>("WAITING");
-  const [handIdx, setHandIdx] = useState(0);
   const {roomId} = useParams<{roomId: string}>(); // Get the roomId from the route
 
   //global vars for getting current player name, as well as updating balance stored locally
@@ -31,6 +26,8 @@ const Game = () => {
 
   //if we can't get a roomid, we re direct user back to home
   useEffect(()=>{
+    listenForSocketError();
+    
     if(!roomId){
       nav("/Home");
       alert("Join room Failed")
@@ -48,33 +45,17 @@ const Game = () => {
   //whenever data is updated, we update the parameters
   useEffect(()=>{
     if(data){
-      const {players, hands, handIndex, gameState}= data;
-      setPlayers(players);
-      setHands(hands);
-      setHandIdx(handIndex)
-      setGameState(gameState)
-      setBalance(players.find((player)=> playerName === player.playerName)?.balance || 100)
+      const {players}= data;
+      setBalance(players.find((player)=> playerName === player.playerName)?.balance || 0)
     }
   }, [data])
 
   //if not game room, we can display a waiting message, else we display the game room
   if(data && roomId){
-    let numPlayersReady = 0;
-    let isThisPlayerReady = false;
-    const numPlayers = players.length;
-    if(gameState === "WAITING"){
-    //generating display information for waiting phase
-      players.forEach(player=>{
-        if(player.ready){
-          numPlayersReady ++;
-          if(player.playerName === playerName) isThisPlayerReady = true;
-        }
-      })
-    }
-    
+    const numPlayers = data.players.length;
     return(
       <div>
-        <Header roomID={roomId} />
+        <Header roomID={roomId} numPlayers={numPlayers}/>
         <Table 
           data = {data} 
           roomId={roomId}

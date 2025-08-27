@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { gameConstants } from '../../scripts/utils';
 interface TimerProps {
   gameState: string;
 }
@@ -12,10 +12,10 @@ const Timer: React.FC<TimerProps> = ({ gameState }) => {
   // Timer durations (match your server constants)
   const getTimerDuration = (state: string): number => {
     switch (state) {
-      case 'BETTING': return 10000; 
-      case 'DEALING': return 5000;  
-      case 'ACTING': return 10000;  
-      case 'REVEALING': return 5000;
+      case 'BETTING': return gameConstants.BETTING_TIMER; 
+      case 'DEALING': return gameConstants.DEALING_TIMER;  
+      case 'ACTING': return gameConstants.ACTING_TIMER;  
+      case 'REVEALING': return gameConstants.REVEALING_TIMER;
       default: return 0;
     }
   };

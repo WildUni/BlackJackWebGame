@@ -2,12 +2,15 @@ import { useState } from "react";
 import { usePlayer } from "../player-context";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * The login page should have an option to play as guest
+ * Future Implementation: Allow google login
+ * @returns The login page
+ */
 function LoginPage(){
     const { setPlayerName, setBalance} = usePlayer();
     const [guestName, setGuestName] = useState("Guest-");
     const navigate = useNavigate();
-
-
 
     const handleGuestPlayer = () =>{
         if (!guestName || guestName === "Guest-") {

@@ -5,7 +5,7 @@ import type { Socket } from "socket.io";
 import type { playerInfo } from "./utils";
 import assert from "assert";
 import GameRoom from "./gameLogic";
-import { gameConstants } from "./utils";
+import { gameConstants, socketErrorTypes } from "./utils";
 
 const playerToSocket = new Map<string, Socket>();
 
@@ -26,7 +26,6 @@ const io = new Server(server, {
 
 const runningGames = new Map<string, GameRoom>();
 const runningTimers = new Map<string, NodeJS.Timeout>();
-const MAX_NUM_PLAYERS = 3;
 
 //Some room management functions
 async function leaveAllPublic(socket: import("socket.io").Socket) {
@@ -64,8 +63,6 @@ io.on('connection', (socket) => {
         console.log(`Game ${game.roomId} has ended and is restarting!`)
     }
 
-
-
     const handleActionPhase = (game: GameRoom) =>{
         if(game.getGameState() !== "ACTING"){
             return;
@@ -91,14 +88,12 @@ io.on('connection', (socket) => {
 
     console.log(`✅ Player ${playerName} connected:`, socket.id);
 
-    
     if(playerToSocket.has(playerName)){
         const oldSocket = playerToSocket.get(playerName)??assert.fail();
         leaveAllPublic(oldSocket);
         playerToSocket.set(playerName, socket);
         console.log("Removed old player socket from server");
     }
-
 
     /**
      * Handles join room:
@@ -132,12 +127,17 @@ io.on('connection', (socket) => {
         }
 
 
-        //handles max capacity and invalid game state, should split into two checks!
-        if(game.getGameState() != "WAITING" || game.getNumPlayers() >= MAX_NUM_PLAYERS){
-            socket.emit("error-message", { code: "ROOM_FULL", message: `The can be a max of ${MAX_NUM_PLAYERS} players in the room at the same time`});
+        //handles max capacity and invalid game state
+        if(game.getNumPlayers() >= gameConstants.MAX_PLAYER_COUNT){
+            socket.emit("ERROR", { type: socketErrorTypes.JOIN, description: `The can be a max of ${gameConstants.MAX_PLAYER_COUNT} players in the room at the same time`});
             console.log(`🎮 "${playerName}" was declined from room "${roomId}"`);
             return;
         }
+        if(game.getGameState() != "WAITING"){
+            socket.emit("ERROR", { type: socketErrorTypes.JOIN, description:"The game has started!"})
+        }
+
+
         // Join the socket room
         socket.join(roomId);
         game.addPlayer(playerInfo);
@@ -147,8 +147,6 @@ io.on('connection', (socket) => {
         //sends update
         sendGameData(roomId, game);
     })
-
-
 
     socket.on('player-ready', (roomId) => {
         const game = runningGames.get(roomId)??assert.fail("Games does not exist");
@@ -189,14 +187,12 @@ io.on('connection', (socket) => {
         sendGameData(roomId, game);
     });
 
-    
     socket.on('player-bet', (roomId:string, betSize:number)=>{
         const game = runningGames.get(roomId)??assert.fail("Game does not exist ");
         assert(game.getGameState() === "BETTING", "Game not in betting state!");
         game.setPlayerBet(playerName, betSize);
         sendGameData(roomId, game);
     })
-
 
     socket.on('player-action', (roomId: string, action:string) => {
         const game = runningGames.get(roomId)??assert.fail("Game not found!");
@@ -212,6 +208,7 @@ io.on('connection', (socket) => {
                 try{
                     game.doubleDownAction(playerName);
                 }catch(e){
+                    socket.emit("ERROR", {type:socketErrorTypes.DOUBLE, description:"Double Action Failed"})
                     return;
                 }
                 break;
@@ -219,6 +216,7 @@ io.on('connection', (socket) => {
                 try{
                     game.playerSplitHand();
                 }catch(e){
+                    socket.emit("ERROR", {type:socketErrorTypes.SPLIT, description:"SPLIT ACTION FAILED"})
                     return;
                 }
                 

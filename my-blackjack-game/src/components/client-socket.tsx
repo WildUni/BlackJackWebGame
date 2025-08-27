@@ -1,7 +1,9 @@
-import type { displayData } from "../scripts/utils";
+import { useNavigate } from "react-router-dom";
+import { socketErrorTypes, type displayData, type socketErrorMsg } from "../scripts/utils";
 import { usePlayer } from "./player-context";
 
 export function useGameSocket() {
+  const nav = useNavigate()
   const { socket } = usePlayer();
 
   function joinRoom(roomId: string) {
@@ -23,6 +25,7 @@ export function useGameSocket() {
   function leaveRoom(roomId: string) {
     socket?.emit("leave-room", roomId);
     socket?.off("gameUpdate");
+    socket?.off('ERROR')
   }
 
   function setUpGameListener(func: (data: displayData) => void){
@@ -33,11 +36,18 @@ export function useGameSocket() {
     });
   }
 
-  function listenForSocketError(func:(msg : {type:string, reason: string})=>void){
-    socket?.on("Error", (msg : {type:string, reason: string}) =>{
-      func(msg);
+  function listenForSocketError(){
+    socket?.on("ERROR", (msg : socketErrorMsg) =>{
+      switch(msg.type){
+        case socketErrorTypes.JOIN:
+          socket?.off("gameUpdate");
+          socket?.off('ERROR')
+          nav("/Home", { replace: true });
+          break;
+      }
+      setTimeout(() => alert(msg.description), 0);
     })
   }
 
-  return { joinRoom, updateReadyStatus, addBet, playerAction, leaveRoom, setUpGameListener };
+  return { joinRoom, updateReadyStatus, addBet, playerAction, leaveRoom, setUpGameListener, listenForSocketError};
 }

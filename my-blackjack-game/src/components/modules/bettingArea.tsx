@@ -1,19 +1,25 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { useGameSocket } from '../client-socket'
+import { usePlayer } from "../player-context"
 
 const BettingArea = (props: {
-  gameState: string
-  balance: number
   roomId: string
 }) => {
-  const [currentBet, setCurrentBet] = useState(25)
-  const [customAmount, setCustomAmount] = useState("")
+  //for betting input
+  const [currentBet, setCurrentBet] = useState(25);
+  const [customAmount, setCustomAmount] = useState("");
+
+  //for showing the expanded betting menu
   const [showCustomInput, setShowCustomInput] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const balance = props.balance || 100
-  const chipValues = [5, 25, 50, 100]
+  
+  //balance from user context
+  const {balance} = usePlayer();
   const {addBet} = useGameSocket();
 
+  const chipValues = [5, 25, 50, 100]
+
+  
   const handleCustomBet = () => {
     const amount = parseInt(customAmount)
     if (amount >= 5 && amount <= balance) {

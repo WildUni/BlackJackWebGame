@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useGameSocket } from "../client-socket";
+
 
 function Home(){
     const [gameCode, setGameCode] = useState("");

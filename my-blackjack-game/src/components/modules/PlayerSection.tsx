@@ -1,14 +1,20 @@
 import Hand from "./playerHand"
 import type {displayHand } from "../../scripts/utils"
 
+/**
+ * Represents the row that displays the hands currently in play.
+ * The row high lights the current hand in play.
+ * @param props an array of hands that stores information abt each corresponding hand, the handindex which represents the 
+ * index of the current hand in play, and an array representing the result of the each hand.
+ * @returns 
+ */
 const PlayerSection = (props: {
   hands: Array<displayHand>, 
   handIndex: number,
-  handResult: Array<"W"|"T"|"L">  // Changed from winningHandIndex to handResult
+  handResult: Array<"W"|"T"|"L">
 }) => {
   
-  const { hands, handIndex, handResult } = props  // Changed here too
-
+  const { hands, handIndex, handResult } = props  
   return (
     <div className="w-full">
       {/* Mobile: Stack vertically on small screens, flex on larger screens */}
@@ -21,6 +27,7 @@ const PlayerSection = (props: {
               <Hand
                 hand = {hand}
                 selected={selected}
+                //defaults to L bc it doesnt have special borders
                 result = {handResult.length ? handResult[index]:"L"}
               />
 

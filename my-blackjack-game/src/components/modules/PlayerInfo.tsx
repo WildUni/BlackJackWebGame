@@ -1,11 +1,15 @@
-function PlayerInfoBox(props: { playerName: string; balance: number; isPlayerReady: boolean; currentBet: number; gameState: string }) {
-  const { playerName, balance, isPlayerReady, currentBet, gameState } = props;
+/**
+ * A box displaying a player's basic information. 
+ * This box should only be displayed during the waiting, and betting phase!
+ * @param props playername, player balance, ready status, current bets
+ * @returns 
+ */
+function PlayerInfoBox(props: { playerName: string; balance: number; isPlayerReady: boolean; currentBet: number}) {
+  const { playerName, balance, isPlayerReady, currentBet } = props;
 
   return (
-    <div
-      className={`relative w-44 rounded-xl p-5 shadow-xl border border-white/10
-                  bg-white/5 backdrop-blur-xl overflow-hidden`}
-    >
+    <div className={`relative w-44 rounded-xl p-5 shadow-xl border border-white/10
+                  bg-white/5 backdrop-blur-xl overflow-hidden`}>
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 rounded-xl animate-pulse" />
 
@@ -36,17 +40,14 @@ function PlayerInfoBox(props: { playerName: string; balance: number; isPlayerRea
               ring-1 shadow-sm
               ${isPlayerReady
                 ? "bg-emerald-500/15 text-emerald-300 ring-emerald-400/25"
-                : "bg-rose-500/15 text-rose-300 ring-rose-400/25"}`}
-          >
+                : "bg-rose-500/15 text-rose-300 ring-rose-400/25"}`}>
             {isPlayerReady ? "✓ Ready" : "Ready Up"}
           </span>
         </div>
 
         {/* Current Bet */}
         <div className="text-amber-300/90 text-sm font-medium">
-          {gameState === 'WAITING'
-            ? 'Waiting for players...'
-            : `Current Bet: ${currentBet !== undefined ? currentBet : 0}`}
+          {`Current Bet: ${currentBet !== undefined ? currentBet : 0}`}
         </div>
       </div>
     </div>

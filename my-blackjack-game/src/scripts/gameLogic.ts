@@ -1,7 +1,8 @@
 import {Card, Deck } from "./deck";
 import assert from "assert";
 import { gameConstants } from "./utils";
-import type {displayData, gameState, hand, playerInfo} from "./utils";
+import type {displayData, gameState, hand, playerInfo, socketErrorMsg} from "./utils";
+
 
 
 class GameRoom{
@@ -96,6 +97,7 @@ class GameRoom{
         this.hands = [];
         this.selectionCounter = 0;
         this.gameState = "WAITING";
+        this.handResult = [];
         for(const [_, info] of this.players){
             info.ready = false;
             info.currentBet = 0;
@@ -354,7 +356,7 @@ class GameRoom{
             player.balance -= hand.betValue;
             hand.betValue += hand.betValue;
         }else{
-            throw new Error("Insuifficient Balance")
+            throw new Error("Insufficient Balance!")
         }
     }
 
@@ -365,9 +367,10 @@ class GameRoom{
     public playerSplitHand(){
         
         const hand = this.hands[this.selectionCounter];
+        assert(hand);
         
         assert(hand.cards.length === 2 && hand.cards[0].getValue() === hand.cards[1].getValue(), "Cards do not have the same card value");
-
+        assert(this.players?.get(hand.playerName)?.balance || 0  >= hand.betValue, "Player has Insufficient Balance!");
         const newHands = [];
         const {playerName, cards, betValue} = hand;
 
