@@ -164,6 +164,11 @@ io.on('connection', (socket) => {
 
                     game.initHands();
                     game.dealInitCards();
+                    if(game.checkForTermination()){
+                        game.setGameState("REVEALING");
+                        handRevealAndRestart(game)
+                        return
+                    }
 
                     //ask for double down
                     sendGameData(roomId, game);
@@ -177,6 +182,7 @@ io.on('connection', (socket) => {
                     }, gameConstants.DEALING_TIMER);
             }catch(e){
                 game.setGameState("WAITING");
+                game.restartGame();
                 console.log("Game failed to start because no bet was placed")
                 sendGameData(roomId, game);
             }

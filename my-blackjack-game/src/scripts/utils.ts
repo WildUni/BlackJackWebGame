@@ -11,7 +11,7 @@ export const gameConstants = {
     BETTING_TIMER:10000,
     DEALING_TIMER:5000,
     ACTING_TIMER:10000,
-    REVEALING_TIMER:5000
+    REVEALING_TIMER:10000
 }
 
 export type gameState = "WAITING" | "BETTING" | "DEALING" | "ACTING"| "REVEALING";

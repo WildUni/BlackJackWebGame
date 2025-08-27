@@ -1,12 +1,11 @@
 import {Card, Deck } from "./deck";
 import assert from "assert";
 import { gameConstants } from "./utils";
-import type {displayData, gameState, hand, playerInfo, socketErrorMsg} from "./utils";
+import type {displayData, gameState, hand, playerInfo} from "./utils";
 
 
 
 class GameRoom{
-    
     public readonly players:Map<string, playerInfo> = new Map();
     private dealer: Array<Card> = [];
     private hands: Array<hand> = [];
@@ -19,9 +18,12 @@ class GameRoom{
         this.roomId = roomID;
         this.deck = new Deck(gameConstants.NUM_DECKS);
     }
-    
-    public getDisplayData():displayData{
 
+    /**
+     * 
+     * @returns an object of type display data containing the information of the game room
+     */
+    public getDisplayData():displayData{
         const players = [];
         for(const [playerName, info] of this.players){
             players.push({
@@ -46,7 +48,9 @@ class GameRoom{
         }
         const gameState = this.gameState;
         const handIndex = this.selectionCounter;
-        const dealerHand = []
+        const dealerHand = [];
+
+
         if(this.dealer.length){
             if(this.gameState != "REVEALING"){
                 dealerHand.push(this.dealer[0].getValue() + this.dealer[0].getSuit())
@@ -68,9 +72,64 @@ class GameRoom{
         }
     }
 
-    /*
-    ROOM FUNCTIONS
-    */
+    public getHands():Array<hand>{
+        return this.hands;
+    }
+
+    public getDealerHand():Array<Card>{
+        return this.dealer;
+    }
+
+    public getGameState():gameState{
+        return this.gameState;
+    }
+
+    /**
+     * @returns A number representing the number of players
+     */
+    public getNumPlayers():number{
+        return this.players.size;
+    }
+
+    public getPlayersInfo():Map<string, playerInfo>{
+        return this.players;
+    }
+
+    /** 
+     * @returns gets the current players name/id 
+     */
+    public getCurrentPlayerName():string{
+        return this.hands[this.selectionCounter].playerName;
+    }
+
+
+    public getCurrentHandIndex():number{
+        return this.selectionCounter;
+    }
+    /**
+     * Evaluates a given hand value
+     * @param hand An array of cards
+     * @returns an number representing the highest hand value <= 21
+     */
+    public getHandValue(hand:Array<Card>):number{
+        let value = 0;
+        let aces = 0;
+        for (const card of hand) {
+            const cardValue = card.getNumericValue();
+            if (cardValue === 1) {
+                aces++;
+                value += 11;
+            } else {
+                value += cardValue;
+            }
+        }
+        while (value > 21 && aces > 0) {
+            value -= 10;
+            aces--;
+        }
+        return value;
+    }
+
 
     /**
      * Adds the player to the game room object
@@ -90,21 +149,6 @@ class GameRoom{
 
 
     /**
-     * Restarts the game, resetting the deck, hands, selection counter and return state to waiting
-     */
-    public restartGame(){
-        this.deck = new Deck(gameConstants.NUM_DECKS);
-        this.hands = [];
-        this.selectionCounter = 0;
-        this.gameState = "WAITING";
-        this.handResult = [];
-        for(const [_, info] of this.players){
-            info.ready = false;
-            info.currentBet = 0;
-        }
-    }
-
-    /**
      * Changes the player's ready status
      * @param playerID Player Id/name
      */
@@ -114,6 +158,40 @@ class GameRoom{
     }
 
 
+    /**
+     * Restarts the game, resetting the deck, hands, selection counter and return state to waiting
+     */
+
+
+    /**
+     * @returns The state of the current game WAITING, BETTING, DEALING, ACTING, REVEALING
+     */
+    public restartGame(){
+        this.deck = new Deck(gameConstants.NUM_DECKS);
+        this.hands = [];
+        this.dealer = [];
+        this.selectionCounter = 0;
+        this.gameState = "WAITING";
+        this.handResult = [];
+        for(const [_, info] of this.players){
+            info.ready = false;
+            info.currentBet = 0;
+        }
+    }
+
+
+    public setGameState(state:gameState){
+        this.gameState = state;
+    }
+
+
+    /**
+     * @returns return iff all hands are no longer in play
+     * should be called when an iteration is complete
+     */
+    public checkForTermination():boolean{
+        return this.hands.every(hand => !hand.inPlay);
+    }
 
     /*
     Game State Checks
@@ -130,55 +208,6 @@ class GameRoom{
             }
         }
         return true;
-    }
-    
-    /**
-     * @returns return iff all hands are no longer in play
-     * should be called when an iteration is complete
-     */
-    public checkForTermination():boolean{
-        return this.hands.every(hand => !hand.inPlay);
-    }
-    
-    /**
-     * @returns The state of the current game WAITING, BETTING, DEALING, ACTING, REVEALING
-     */
-    public getGameState():gameState{
-        return this.gameState;
-    }
-
-    public getHands():Array<hand>{
-        return this.hands;
-    }
-
-    public getDealerHand():Array<Card>{
-        return this.dealer;
-    }
-
-    
-    /**
-     * 
-     * @returns A number representing the number of players
-     */
-    public getNumPlayers():number{
-        return this.players.size;
-    }
-
-    public getPlayersInfo():Map<string, playerInfo>{
-        return this.players;
-    }
-
-    /**
-     * 
-     * @returns gets the current players name/id 
-     */
-    public getCurrentPlayerName():string{
-        return this.hands[this.selectionCounter].playerName;
-    }
-
-
-    public getCurrentHandIndex():number{
-        return this.selectionCounter;
     }
 
     /*Betting Phase*/
@@ -265,31 +294,6 @@ class GameRoom{
 
 
     /**
-     * Evaluates a given hand value
-     * @param hand An array of cards
-     * @returns an number representing the highest hand value <= 21
-     */
-    public getHandValue(hand:Array<Card>):number{
-        let value = 0;
-        let aces = 0;
-        for (const card of hand) {
-            const cardValue = card.getNumericValue();
-            if (cardValue === 1) {
-                aces++;
-                value += 11;
-            } else {
-                value += cardValue;
-            }
-        }
-        while (value > 21 && aces > 0) {
-            value -= 10;
-            aces--;
-        }
-        return value;
-    }
-
-
-    /**
      * Gives card to dealer until dealer value is greater or equal to minimum
      */
     public dealerReveal(){
@@ -368,7 +372,6 @@ class GameRoom{
         
         const hand = this.hands[this.selectionCounter];
         assert(hand);
-        
         assert(hand.cards.length === 2 && hand.cards[0].getValue() === hand.cards[1].getValue(), "Cards do not have the same card value");
         assert(this.players?.get(hand.playerName)?.balance || 0  >= hand.betValue, "Player has Insufficient Balance!");
         const newHands = [];
@@ -434,14 +437,6 @@ class GameRoom{
                 }else this.handResult.push("L");
             }
         })
-    }
-
-    public setGameState(state:gameState){
-        this.gameState = state;
-    }
-
-    public winnerData(){
-        
     }
 }
 

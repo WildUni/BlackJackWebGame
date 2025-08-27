@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGameSocket } from "../client-socket";
-
 
 function Home(){
     const [gameCode, setGameCode] = useState("");
@@ -68,7 +66,7 @@ function Home(){
                     {/* Single Join/Create Button */}
                     <div className="mb-8">
                         <button 
-                            className="block mx-auto bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 text-white font-semibold px-5 py-3 rounded-xl 
+                            className="mx-auto bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 text-white font-semibold px-5 py-3 rounded-xl 
                                     transform transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:via-purple-600 hover:to-emerald-600 
                                     shadow-md active:scale-95 flex items-center justify-center gap-3"
                             onClick={gameCode ? handleJoinGame : handleStartNewGame}

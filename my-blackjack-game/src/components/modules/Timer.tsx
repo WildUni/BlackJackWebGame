@@ -66,11 +66,11 @@ const Timer: React.FC<TimerProps> = ({ gameState }) => {
   const totalSeconds = Math.ceil(getTimerDuration(gameState) / 1000);
   const percentage = totalSeconds > 0 ? (timeRemaining / getTimerDuration(gameState)) * 100 : 0;
 
-  const getTimerColor = (percentage: number): string => {
-    if (percentage > 60) return 'from-green-500 to-emerald-500';
-    if (percentage > 30) return 'from-yellow-500 to-orange-500';
-    return 'from-red-500 to-pink-500';
-  };
+  // const getTimerColor = (percentage: number): string => {
+  //   if (percentage > 60) return 'from-green-500 to-emerald-500';
+  //   if (percentage > 30) return 'from-yellow-500 to-orange-500';
+  //   return 'from-red-500 to-pink-500';
+  // };
 
   // Don't show timer for WAITING state or when inactive
   if (!isActive || timeRemaining <= 0 || gameState === 'WAITING') return null;
