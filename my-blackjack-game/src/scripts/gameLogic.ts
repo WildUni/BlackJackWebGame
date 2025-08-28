@@ -417,7 +417,8 @@ class GameRoom{
         const dealerVal = this.getHandValue(this.dealer);  
         this.hands.forEach((hand)=>{
             const handVal = this.getHandValue(hand.cards);
-            const player = this.players.get(hand.playerName)??assert.fail();
+            const player = this.players.get(hand.playerName)
+            if(player)
             if(dealerVal > 21){
                 if(handVal <= 21){
                     player.balance += hand.betValue * 2;

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useGameSocket } from '../client-socket'
 import { usePlayer } from "../player-context"
 
-const BettingArea = (props: {
+export const BettingArea = (props: {
   roomId: string
 }) => {
   //for betting input

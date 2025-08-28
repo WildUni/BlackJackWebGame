@@ -1,4 +1,4 @@
-import Hand from "./playerHand"
+import Hand from "./PlayerHand"
 
 const DealerSection = (props:{dealerHand:Array<string>}) => {
   const { dealerHand } = props

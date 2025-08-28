@@ -1,5 +1,5 @@
-import Hand from "./playerHand"
-import type {displayHand } from "../../scripts/utils"
+import Hand from "./PlayerHand"
+import type {displayHand, gameState } from "../../scripts/utils"
 
 /**
  * Represents the row that displays the hands currently in play.
@@ -12,19 +12,20 @@ const PlayerSection = (props: {
   hands: Array<displayHand>, 
   handIndex: number,
   handResult: Array<"W"|"T"|"L">
+  gameState:gameState
 }) => {
   
-  const { hands, handIndex, handResult } = props  
+  const { hands, handIndex, handResult, gameState } = props  
   return (
     <div className="w-full">
       {/* Mobile: Stack vertically on small screens, flex on larger screens */}
       <div className="flex flex-col sm:flex-row sm:justify-around sm:items-center w-full flex-wrap gap-3 md:gap-5">
         {hands.map((hand, index) => {
-          const selected = index === handIndex;          
+          const selected = index === handIndex && gameState === "ACTING";          
           return (
-            <div key={index} className="flex justify-center">
+            <div className="flex justify-center">
               {/* Generate Each hand*/}
-              <Hand
+              <Hand key={index}
                 hand = {hand}
                 selected={selected}
                 //defaults to L bc it doesnt have special borders

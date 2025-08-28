@@ -7,7 +7,7 @@ import { useGameSocket } from '../client-socket'
  * @param props contains a string representing the roomId of the game room
  * @returns a player controls module with 3 buttons: Hit, stand, and split
  */
-const PlayerControls = (props: {
+export const PlayerControls = (props: {
   roomId: string,
 }) => {
 

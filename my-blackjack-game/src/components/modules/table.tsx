@@ -1,12 +1,11 @@
 import DealerSection from './DealerSection'
 import PlayerSection from './PlayerSection'
-import PlayerControls from './playerControls'
 import type { displayData } from '../../scripts/utils'
 import { usePlayer } from '../player-context'
 import { useGameSocket } from '../client-socket'
 import PlayerInfoBox from './PlayerInfo'
-import BettingArea from './bettingArea'
-import { DoubleButton } from './playerControls'
+import BettingArea from './BettingArea'
+import { DoubleButton, PlayerControls} from './PlayerControls'
 import Timer from './Timer'
 
 /**
@@ -106,7 +105,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
           hands={hands} 
           handIndex={handIndex}
           handResult={handResult}
-          
+          gameState={gameState}
         />
       </div>
     </>
@@ -163,18 +162,20 @@ const Table = (props: { data: displayData, roomId: string }) => {
    * The table should show dealer's cards, and players' hands, and the player action interface
    * @returns The table during the acting phase
    */
-  const renderActing = () => (
+  const renderActing = () => {
+    const currentPlayer = hands[handIndex].playerName
+    return (
     <>
       {renderGameTable()}
       <Timer gameState={gameState} />
       {/* Game Controls */}
       <div className='flex-shrink-0 mb-2 px-4'>
-        <PlayerControls 
+        {currentPlayer === playerName? <PlayerControls 
           roomId={roomId}
-        />
+        />:<div className='text-amber-300/90 text-sm font-medium'>{`Waiting for ${currentPlayer} to pick an action!`}</div>}
       </div>
     </>
-  );
+  )};
 
 
   /**
@@ -190,7 +191,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
     return (
       <>
         {renderGameTable()}
-        
+
         <div className="mt-4 flex flex-col items-center">
           <span className="text-lg font-bold text-white">
             Game Ended

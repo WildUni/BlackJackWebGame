@@ -72,11 +72,13 @@ io.on('connection', (socket) => {
         const timer = setTimeout(()=>{
             game.standAction();
             runningTimers.delete(game.roomId);
+            sendGameData(game.roomId, game)
             if(game.getGameState() === "REVEALING"){
                 handRevealAndRestart(game);
             }
             handleActionPhase(game);
         }, gameConstants.ACTING_TIMER)
+
         runningTimers.set(game.roomId, timer);
     }
 
@@ -118,7 +120,7 @@ io.on('connection', (socket) => {
         }
 
         //if player already exists, replace socket
-        if(game.players.has(playerName)){
+        if(game.getPlayersInfo().has(playerName)){
             const tempInfo: playerInfo = game.players.get(playerName)??assert.fail();
             tempInfo.socket = socket.id;
             console.log(`🎮 "${playerName}" rejoining room "${roomId}"`);

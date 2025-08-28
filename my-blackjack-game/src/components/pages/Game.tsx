@@ -2,8 +2,8 @@ import { usePlayer } from '../player-context'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import '../modules/style.css'
-import Header from '../modules/header'
-import Table from '../modules/table'
+import Header from '../modules/Header'
+import Table from '../modules/Table'
 import type { displayData } from '../../scripts/utils'
 import { useGameSocket } from '../client-socket'
 
@@ -27,7 +27,7 @@ const Game = () => {
   //if we can't get a roomid, we re direct user back to home
   useEffect(()=>{
     listenForSocketError();
-    
+
     if(!roomId){
       nav("/Home");
       alert("Join room Failed")
