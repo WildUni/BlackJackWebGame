@@ -34,6 +34,7 @@ Note that this is a simple attempt at recreating the classic game of Blackjack.
 - The game is still missing card related animations, such as card distribution and card reveals.
 - There is a profile page that only displays your name and balance. The game history is simply a template as of now.
 - There are still a lot of optimization to be done!
+- There are still a lot of code documentation to be done!
 
 
 
