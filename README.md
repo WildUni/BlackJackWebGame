@@ -37,5 +37,6 @@ Note that this is a simple attempt at recreating the classic game of Blackjack.
 - There are still a lot of code documentation to be done!
 
 
-
+Known Bugs:
+- A certain combination of actions leads could lead to negative balances
 
