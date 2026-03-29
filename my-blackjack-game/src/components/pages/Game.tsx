@@ -2,8 +2,8 @@ import { usePlayer } from '../player-context'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import '../modules/style.css'
-import Header from '../modules/Header'
-import Table from '../modules/Table'
+import Header from '../modules/header'
+import Table from '../modules/table'
 import type { displayData } from '../../scripts/utils'
 import { useGameSocket } from '../client-socket'
 
@@ -48,6 +48,7 @@ const Game = () => {
       const {players}= data;
       setBalance(players.find((player)=> playerName === player.playerName)?.balance || 0)
     }
+    // console.log(data)
   }, [data])
 
   //if not game room, we can display a waiting message, else we display the game room

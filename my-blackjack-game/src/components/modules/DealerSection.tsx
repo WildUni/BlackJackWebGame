@@ -1,12 +1,13 @@
-import Hand from "./PlayerHand"
+import Hand from "./playerHand"
 
-const DealerSection = (props:{dealerHand:Array<string>}) => {
-  const { dealerHand } = props
+const DealerSection = (props:{dealerHand:Array<string>, dealerHandValue:number}) => {
+  const { dealerHand, dealerHandValue } = props
   const dealerHandProp = {playerName:"DEALER",
     cards: dealerHand,
-    handValue: 0,
+    handValue: dealerHandValue,
     betValue: 0,
   }
+  // console.log(dealerHand, dealerHandValue)
   return (
     <div className="flex flex-col items-center gap-4">
       <Hand

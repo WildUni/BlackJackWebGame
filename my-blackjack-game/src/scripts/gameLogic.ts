@@ -49,22 +49,26 @@ class GameRoom{
         const gameState = this.gameState;
         const handIndex = this.selectionCounter;
         const dealerHand = [];
+        let dealerHandValue = this.getHandValue(this.dealer)
 
 
         if(this.dealer.length){
             if(this.gameState != "REVEALING"){
                 dealerHand.push(this.dealer[0].getValue() + this.dealer[0].getSuit())
                 dealerHand.push("HIDDEN")
+                dealerHandValue = 0
             }else{
                 for(const card of this.dealer){
                     dealerHand.push(card.getValue() + card.getSuit());
                 }
             }
         }
+
         return{
             players,
             hands,
-            dealerHand, 
+            dealerHand,
+            dealerHandValue,
             gameState,
             handIndex, 
             roomId: this.roomId,

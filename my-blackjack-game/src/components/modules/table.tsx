@@ -4,8 +4,8 @@ import type { displayData } from '../../scripts/utils'
 import { usePlayer } from '../player-context'
 import { useGameSocket } from '../client-socket'
 import PlayerInfoBox from './PlayerInfo'
-import BettingArea from './BettingArea'
-import { DoubleButton, PlayerControls} from './PlayerControls'
+import BettingArea from './bettingArea'
+import { DoubleButton, PlayerControls} from './playerControls'
 import Timer from './Timer'
 
 /**
@@ -18,11 +18,15 @@ import Timer from './Timer'
  */
 const Table = (props: { data: displayData, roomId: string }) => {
   // Extract data from props
-  const { players, hands, gameState, dealerHand, handIndex, handResult } = props.data;
+  const { players, hands, gameState, dealerHand, handIndex, handResult, dealerHandValue } = props.data;
   const roomId = props.roomId;
   const { playerName} = usePlayer();
   const { updateReadyStatus } = useGameSocket();
   
+
+  console.log('DEALER', dealerHandValue)
+
+
   // Calculate ready status
   let isThisPlayerReady = false;
   let numPlayersReady = 0;
@@ -96,7 +100,7 @@ const Table = (props: { data: displayData, roomId: string }) => {
     <>
       {/* Dealer Section */}
       <div className='flex-shrink-0 mt-2 md:mt-4'>
-        <DealerSection dealerHand={dealerHand} />
+        <DealerSection dealerHand={dealerHand} dealerHandValue={dealerHandValue} />
       </div>
 
       {/* Players Section */}

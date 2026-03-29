@@ -39,6 +39,7 @@ export type displayData = {
     players:Array<displayPlayer>,
     hands:Array<displayHand>,
     dealerHand:Array<string>,
+    dealerHandValue: number,
     gameState:gameState,
     handIndex:number,
     roomId:string,

@@ -1,4 +1,4 @@
-import Hand from "./PlayerHand"
+import Hand from "./playerHand"
 import type {displayHand, gameState } from "../../scripts/utils"
 
 /**
